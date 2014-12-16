@@ -23,6 +23,8 @@ from oslo.serialization import jsonutils
 from murano.common import config
 from murano.common.helpers import token_sanitizer
 from murano.common import rpc
+from murano.common.model_policy_enforcer import ModelPolicyEnforcer
+from murano.common.model_policy_enforcer import ValidationException
 from murano.dsl import dsl_exception
 from murano.dsl import executor
 from murano.dsl import results_serializer
@@ -107,11 +109,16 @@ class TaskExecutor(object):
         self._environment.tenant_id = task['tenant_id']
         self._environment.system_attributes = self._model.get('SystemData', {})
         self._environment.clients = client_manager.ClientManager()
+        self._model_policy_enforcer = ModelPolicyEnforcer()
 
     def execute(self):
         self._create_trust()
 
         try:
+            if config.CONF.engine.enable_model_policy_enforcer:
+                self._model_policy_enforcer.validate(self.model)
+
+
             # pkg_loader = package_loader.DirectoryPackageLoader('./meta')
             # return self._execute(pkg_loader)
 
@@ -120,6 +127,13 @@ class TaskExecutor(object):
             with package_loader.ApiPackageLoader(
                     murano_client_factory) as pkg_loader:
                 return self._execute(pkg_loader)
+
+        except ValidationException as e:
+            LOG.exception(e)
+            # reporter = status_reporter.StatusReporter()
+            # reporter.initialize(self.environment)
+            # reporter.report_error(self.environment, str(e))
+
         finally:
             if self._model['Objects'] is None:
                 self._delete_trust()

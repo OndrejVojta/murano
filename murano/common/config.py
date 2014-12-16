@@ -181,7 +181,9 @@ engine_opts = [
                 help=_('Disallow the use of murano-agent')),
     cfg.BoolOpt('use_trusts', default=False,
                 help=_("Create resources using trust token rather "
-                       "than user's token"))
+                       "than user's token")),
+    cfg.BoolOpt('enable_model_policy_enforcer', default=False,
+                help=_('Enable model policy enforcer using Congress'))
 ]
 
 # TODO(sjmc7): move into engine opts?
