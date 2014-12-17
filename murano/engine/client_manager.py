@@ -13,10 +13,11 @@
 #    under the License.
 
 
-from eventlet import semaphore
-import keystoneclient
-import heatclient.client as hclient
 import congressclient.v1.client as cclient
+
+from eventlet import semaphore
+import heatclient.client as hclient
+import keystoneclient
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
 from oslo.config import cfg
@@ -88,7 +89,6 @@ class ClientManager(object):
             return cclient.Client(session=session, service_type='policy')
 
         return self._get_client(context, 'congress', use_trusts, factory)
-
 
     def get_heat_client(self, context, use_trusts=True):
         if not config.CONF.engine.use_trusts:
