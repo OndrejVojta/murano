@@ -1,6 +1,6 @@
 # Copyright (c) 2014 Mirantis, Inc.
 #
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
 #
@@ -14,11 +14,15 @@
 
 
 from eventlet import semaphore
+import keystoneclient
 import heatclient.client as hclient
+import congressclient.v1.client as cclient
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
+from oslo.config import cfg
 
 from murano.common import config
+
 from murano.dsl import helpers
 from murano.engine import auth_utils
 from murano.engine import environment
@@ -70,6 +74,21 @@ class ClientManager(object):
             if use_trusts else auth_utils.get_client(env)
 
         return self._get_client(context, 'keystone', use_trusts, factory)
+
+    def get_congress_client(self, context, use_trusts=True):
+        if not config.CONF.engine.use_trusts:
+            use_trusts = False
+
+        def factory(keystone_client, auth_token):
+            auth = keystoneclient.auth.identity.v2.Token(
+                auth_url=cfg.CONF.keystone_authtoken.auth_uri,
+                tenant_name=cfg.CONF.keystone_authtoken.admin_tenant_name,
+                token=auth_token)
+            session = keystoneclient.session.Session(auth=auth)
+            return cclient.Client(session=session, service_type='policy')
+
+        return self._get_client(context, 'congress', use_trusts, factory)
+
 
     def get_heat_client(self, context, use_trusts=True):
         if not config.CONF.engine.use_trusts:
