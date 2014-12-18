@@ -1,9 +1,23 @@
-from mock import Mock
-from murano.common.engine import TaskExecutor
-from murano.common import engine
-from murano.common import config
+# Copyright (c) 2014 OpenStack Foundation.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+import mock
+
+import murano.common.config as config
+import murano.common.engine as engine
 from murano.tests.unit import base
-from murano.common.model_policy_enforcer import ValidationException
 
 
 class TestModelPolicyEnforcer(base.MuranoTestCase):
@@ -20,36 +34,26 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
     def test_enforcer_disabled(self):
 
-        executor = TaskExecutor(self.task)
-        executor._execute = Mock()  # replace call to inner method to do nothing
-        executor._model_policy_enforcer = Mock()
+        executor = engine.TaskExecutor(self.task)
+
+        # replace call to inner method to do nothing
+        executor._execute = mock.Mock()
+        executor._model_policy_enforcer = mock.Mock()
+
         executor.execute()
 
-        assert not executor._model_policy_enforcer.validate.called
+        self.assertFalse(executor._model_policy_enforcer.validate.called)
 
     def test_enforcer_enabled(self):
 
-        executor = TaskExecutor(self.task)
-        executor._execute = Mock()  # replace call to inner method to do nothing
-        executor._model_policy_enforcer = Mock()
+        executor = engine.TaskExecutor(self.task)
+
+        # replace call to inner method to do nothing
+        executor._execute = mock.Mock()
+        executor._model_policy_enforcer = mock.Mock()
 
         config.CONF.engine.enable_model_policy_enforcer = True
         executor.execute()
 
-        executor._model_policy_enforcer.validate.assert_called_once_with(self.model)
-
-    def test_validation_failed(self):
-
-        ex = ValidationException('err')
-
-        executor = TaskExecutor(self.task)
-        executor._execute = Mock()  # replace call to inner method to do nothing
-        executor._model_policy_enforcer.validate = Mock(side_effect=ex)
-
-        engine.LOG = Mock()
-
-        config.CONF.engine.enable_model_policy_enforcer = True
-        executor.execute()
-
-        engine.LOG.exception.assert_called_once_with(ex)
-        #self.assertRaises(ValidationException, executor.execute)
+        executor._model_policy_enforcer\
+            .validate.assert_called_once_with(self.model)
