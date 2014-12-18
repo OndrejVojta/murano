@@ -17,34 +17,24 @@
 Policy Enforcer Implementation using Congress client
 """
 
-from congressclient.v1 import client
+from murano.openstack.common import log as logging
+
+LOG = logging.getLogger(__name__)
 
 
-class ModelPolicyEnforcer:
+class ModelPolicyEnforcer(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, environment):
+        self._environment = environment
+        self._client_manager = environment.clients
 
     def validate(self, model):
-        """Process model validation using Congress client"""
+        """Validate model using Congress rule engine"""
 
-        # auth = keystoneclient.auth.identity.v2.Password(
-        #     auth_url=AUTH_URL, username=USERNAME,
-        #     password=PASSWORD, tenant_name=TENANT_NAME)
-        # session = keystoneclient.session.Session(auth=auth)
-        # congress = client.Client(session=session,
-        #                          auth=None,
-        #                          interface='publicURL',
-        #                          service_type='policy',
-        #                          region_name='RegionOne')
+        LOG.info('Validating model')
 
-        congress = client.Client()
+        #TODO(ondrej.vojta): call
+        # client = self._client_manager.get_congress_client(self._environment)
+        # client.execute_policy_action(self, policy_name, action, args)
 
-        body = congress.execute_policy_action('policy_name', 'action')
-
-        if True:  # depending on congress result
-            raise ValidationException('model not valid...')
-
-
-class ValidationException(Exception):
-    pass
+        pass
