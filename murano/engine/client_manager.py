@@ -1,6 +1,6 @@
 # Copyright (c) 2014 Mirantis, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
 #
@@ -14,7 +14,6 @@
 
 
 import congressclient.v1.client as cclient
-
 from eventlet import semaphore
 import heatclient.client as hclient
 import keystoneclient
@@ -23,7 +22,6 @@ import neutronclient.v2_0.client as nclient
 from oslo.config import cfg
 
 from murano.common import config
-
 from murano.dsl import helpers
 from murano.engine import auth_utils
 from murano.engine import environment
@@ -83,7 +81,7 @@ class ClientManager(object):
         def factory(keystone_client, auth_token):
             auth = keystoneclient.auth.identity.v2.Token(
                 auth_url=cfg.CONF.keystone_authtoken.auth_uri,
-                tenant_name=cfg.CONF.keystone_authtoken.admin_tenant_name,
+                tenant_name=keystone_client.tenant_name,
                 token=auth_token)
             session = keystoneclient.session.Session(auth=auth)
             return cclient.Client(session=session, service_type='policy')
