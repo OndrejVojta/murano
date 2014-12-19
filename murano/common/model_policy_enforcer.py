@@ -36,7 +36,7 @@ class ModelPolicyEnforcer(object):
         LOG.info('Validating model')
 
         client = self._client_manager.get_congress_client(self._environment)
-        validation_result = client.execute_policy_action(self, "classification", "simulate",
+        validation_result = client.execute_policy_action("classification", "simulate",
                                               {'query': 'is_valid_model(x)', 'action_policy': 'action',
                                                'sequence': 'create_env+("todo")'})
         if validation_result["result"]:
