@@ -14,7 +14,9 @@
 #    under the License.
 
 """
-Converts Murano model to Congress rules
+Converts murano model to list of congress rules:
+    murano_object+(env_id, obj_id, type_name)
+    murano_property+(obj_id, prop_name, prop_value)
 """
 
 
