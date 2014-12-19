@@ -18,7 +18,7 @@ import mock
 
 import murano.common.config as config
 import murano.common.engine as engine
-from murano.common.model_policy_enforcer import ModelPolicyEnforcer, ValidationError
+import murano.common.model_policy_enforcer as model_policy_enforcer
 from murano.engine import client_manager
 from murano.tests.unit import base
 
@@ -36,10 +36,14 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
     def setUp(self):
         super(TestModelPolicyEnforcer, self).setUp()
-        self.congress_client_mock = mock.Mock(spec=congressclient.v1.client.Client)
+        self.congress_client_mock = \
+            mock.Mock(spec=congressclient.v1.client.Client)
+
         self.client_manager_mock = mock.Mock(spec=client_manager.ClientManager)
 
-        self.client_manager_mock.get_congress_client.return_value = self.congress_client_mock
+        self.client_manager_mock.get_congress_client.return_value = \
+            self.congress_client_mock
+
         self.environment = mock.Mock()
         self.environment.clients = self.client_manager_mock
 
@@ -68,11 +72,16 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
             .validate.assert_called_once_with(self.model)
 
     def test_validation_pass(self):
-        self.congress_client_mock.execute_policy_action.return_value = {"result": []}
-        enforcer = ModelPolicyEnforcer(self.environment)
+        self.congress_client_mock.execute_policy_action.return_value = \
+            {"result": []}
+
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
         enforcer.validate(None)
 
     def test_validation_failure(self):
-        self.congress_client_mock.execute_policy_action.return_value = {"result": ["failure"]}
-        enforcer = ModelPolicyEnforcer(self.environment)
-        self.assertRaises(ValidationError, enforcer.validate, None)
+        self.congress_client_mock.execute_policy_action.return_value = \
+            {"result": ["failure"]}
+
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
+        self.assertRaises(model_policy_enforcer.ValidationError,
+                          enforcer.validate, None)
