@@ -17,12 +17,16 @@
 Policy Enforcer Implementation using Congress client
 """
 
+from murano.common import congress_rules as congress_rules
+
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
+
 class ValidationError(Exception):
     """Raised for validation errors."""
+
 
 class ModelPolicyEnforcer(object):
 
@@ -34,11 +38,22 @@ class ModelPolicyEnforcer(object):
         """Validate model using Congress rule engine"""
 
         LOG.info('Validating model')
+        rules = congress_rules.CongressRules().convert(model)
+        rules_str = " ".join(map(str, rules))
+        LOG.debug('Congress rules: ' + rules_str)
 
         client = self._client_manager.get_congress_client(self._environment)
-        validation_result = client.execute_policy_action("classification", "simulate",
-                                              {'query': 'is_valid_model(x)', 'action_policy': 'action',
-                                               'sequence': 'create_env+("todo")'})
+        validation_result = client.execute_policy_action(
+            "classification",
+            "simulate",
+            {'query': 'is_valid_model(x)', 'action_policy': 'action',
+            'sequence': rules_str})
+
         if validation_result["result"]:
             raise ValidationError("Model validation failed!")
+        else:
+            LOG.info('Model valid')
+
+        #raise Exception('Model valid')
+
         pass

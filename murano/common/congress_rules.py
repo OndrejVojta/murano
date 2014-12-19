@@ -23,6 +23,9 @@ class CongressRules(object):
     def convert(self, model):
         rules = []
 
+        if model is None or not model['Objects']:
+            return rules
+
         env_id = model['Objects']['?']['id']
 
         for app in model['Objects']['applications']:
@@ -60,7 +63,7 @@ class MuranoObject(object):
         self.type_name = type_name
 
     def __str__(self):
-        return 'murano_object("{0}", "{1}", "{2}")'\
+        return 'murano_object+("{0}", "{1}", "{2}")'\
             .format(self.obj_id, self.env_id, self.type_name)
 
 
@@ -71,5 +74,5 @@ class MuranoProperty(object):
         self.prop_value = prop_value
 
     def __str__(self):
-        return 'murano_property("{0}", "{1}", "{2}")' \
+        return 'murano_property+("{0}", "{1}", "{2}")' \
             .format(self.obj_id, self.prop_name, self.prop_value)
