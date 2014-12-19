@@ -21,6 +21,8 @@ from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
+class ValidationError(Exception):
+    """Raised for validation errors."""
 
 class ModelPolicyEnforcer(object):
 
@@ -33,8 +35,10 @@ class ModelPolicyEnforcer(object):
 
         LOG.info('Validating model')
 
-        #TODO(ondrej.vojta): call
-        # client = self._client_manager.get_congress_client(self._environment)
-        # client.execute_policy_action(self, policy_name, action, args)
-
+        client = self._client_manager.get_congress_client(self._environment)
+        validation_result = client.execute_policy_action(self, "classification", "simulate",
+                                              {'query': 'is_valid_model(x)', 'action_policy': 'action',
+                                               'sequence': 'create_env+("todo")'})
+        if validation_result["result"]:
+            raise ValidationError("Model validation failed!")
         pass
