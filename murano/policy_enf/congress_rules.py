@@ -25,7 +25,7 @@ class CongressRules(object):
     def convert(self, model):
         rules = []
 
-        if model is None or not model['Objects']:
+        if model is None or 'Objects' not in model:
             return rules
 
         env_id = model['Objects']['?']['id']

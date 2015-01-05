@@ -14,9 +14,9 @@
 #    under the License.
 
 import inspect
-import json
 import os.path
 import unittest2 as unittest
+import yaml
 
 import murano.policy_enf.congress_rules as congress
 
@@ -26,7 +26,9 @@ class TestModelPolicyEnforcer(unittest.TestCase):
     def _load_file(self, file_name):
         model_file = os.path.join(
             os.path.dirname(inspect.getfile(self.__class__)), file_name)
-        return json.load(open(model_file))
+
+        with open(model_file) as stream:
+            return yaml.load(stream)
 
     def _create_rules_str(self, model_file):
         model = self._load_file(model_file)
@@ -39,7 +41,7 @@ class TestModelPolicyEnforcer(unittest.TestCase):
         return rules_str
 
     def test_convert_simple_app(self):
-        rules_str = self._create_rules_str('model.json')
+        rules_str = self._create_rules_str('model.yaml')
 
         self.assertFalse("\"instance\"" in rules_str)
 
@@ -63,7 +65,7 @@ class TestModelPolicyEnforcer(unittest.TestCase):
                         '"whjiyi3uzhxes6")' in rules_str)
 
     def test_convert_model_two_instances(self):
-        rules_str = self._create_rules_str('model_two_instances.json')
+        rules_str = self._create_rules_str('model_two_instances.yaml')
 
         self.assertFalse("\"instances\"" in rules_str)
 
@@ -76,7 +78,7 @@ class TestModelPolicyEnforcer(unittest.TestCase):
             ' "flavor", "m1.medium")' in rules_str)
 
     def test_convert_model_with_relations(self):
-        rules_str = self._create_rules_str('model_with_relations.json')
+        rules_str = self._create_rules_str('model_with_relations.yaml')
 
         self.assertFalse(
             'murano_property+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
