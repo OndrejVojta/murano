@@ -54,12 +54,17 @@ class ModelPolicyEnforcer(object):
     def validate(self, model):
         """Validate model using Congress rule engine"""
 
+        client = self._client_manager.get_congress_client(self._environment)
+        if not client:
+            LOG.info('Congress client is not configured'
+                     ' - skipping model validation')
+            return
+
         LOG.info('Validating model')
         rules = congress_rules.CongressRules().convert(model)
         rules_str = " ".join(map(str, rules))
         LOG.debug('Congress rules: ' + rules_str)
 
-        client = self._client_manager.get_congress_client(self._environment)
         validation_result = client.execute_policy_action(
             "classification",
             "simulate",

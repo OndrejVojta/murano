@@ -13,7 +13,12 @@
 #    under the License.
 
 
-import congressclient.v1.client as cclient
+try:
+    # integration with congress is optional
+    import congressclient.v1.client as cclient
+except ImportError:
+    cclient = None
+
 from eventlet import semaphore
 import heatclient.client as hclient
 import keystoneclient
@@ -75,6 +80,9 @@ class ClientManager(object):
         return self._get_client(context, 'keystone', use_trusts, factory)
 
     def get_congress_client(self, context, use_trusts=True):
+        if not cclient:
+            # python congress client not configured
+            return None
         if not config.CONF.engine.use_trusts:
             use_trusts = False
 
