@@ -85,3 +85,11 @@ class TestModelPolicyEnforcer(unittest.TestCase):
         rules = congress_rules.convert(model)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
+
+        self.assertFalse(
+            'murano_property+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
+            '"server", "8ce94f23-f16a-40a1-9d9d-a877266c315d")' in rules_str)
+
+        self.assertTrue(
+            'murano_relationship+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
+            '"8ce94f23-f16a-40a1-9d9d-a877266c315d", "server")' in rules_str)

@@ -30,8 +30,10 @@ class CongressRules(object):
 
         env_id = model['Objects']['?']['id']
 
+        app_ids = []
         for app in model['Objects']['applications']:
             obj = self._create_object_rule(app, env_id)
+            app_ids.append(obj.obj_id)
             rules.append(obj)
             rules.extend(self._create_propety_rules(obj.obj_id, app))
 
@@ -47,6 +49,10 @@ class CongressRules(object):
                 rules.extend(self._create_propety_rules(obj2.obj_id,
                                                         instance))
                 rules.append(obj2)
+
+        # convert MuranoProperty containing reference to another object
+        # to MuranoRelationship
+        rules = [self._create_relationship(rule, app_ids) for rule in rules]
 
         return rules
 
@@ -65,6 +71,20 @@ class CongressRules(object):
                 rules.append(rule)
 
         return rules
+
+    @staticmethod
+    def _is_relationship(rule, app_ids):
+        if not isinstance(rule, MuranoProperty):
+            return False
+
+        return rule.prop_value in app_ids
+
+    def _create_relationship(self, rule, app_ids):
+        if self._is_relationship(rule, app_ids):
+            return MuranoRelationship(rule.obj_id, rule.prop_value,
+                                      rule.prop_name)
+        else:
+            return rule
 
 
 class MuranoObject(object):
@@ -87,3 +107,14 @@ class MuranoProperty(object):
     def __str__(self):
         return 'murano_property+("{0}", "{1}", "{2}")' \
             .format(self.obj_id, self.prop_name, self.prop_value)
+
+
+class MuranoRelationship(object):
+    def __init__(self, source_id, target_id, rel_name):
+        self.source_id = source_id
+        self.target_id = target_id
+        self.rel_name = rel_name
+
+    def __str__(self):
+        return 'murano_relationship+("{0}", "{1}", "{2}")' \
+            .format(self.source_id, self.target_id, self.rel_name)
