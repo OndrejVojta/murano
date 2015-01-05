@@ -14,9 +14,9 @@
 #    under the License.
 
 import inspect
-import json
 import os.path
 import unittest2 as unittest
+import yaml
 
 import murano.policy_enf.congress_rules as congress
 
@@ -26,16 +26,24 @@ class TestModelPolicyEnforcer(unittest.TestCase):
     def _load_file(self, file_name):
         model_file = os.path.join(
             os.path.dirname(inspect.getfile(self.__class__)), file_name)
-        return json.load(open(model_file))
 
-    def test_convert_simple_app(self):
+        with open(model_file) as stream:
+            return yaml.load(stream)
 
-        model = self._load_file('model.json')
+    def _create_rules_str(self, model_file):
+        model = self._load_file(model_file)
 
         congress_rules = congress.CongressRules()
         rules = congress_rules.convert(model)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
+
+        return rules_str
+
+    def test_convert_simple_app(self):
+        rules_str = self._create_rules_str('model.yaml')
+
+        self.assertFalse("\"instance\"" in rules_str)
 
         self.assertTrue(
             'murano_object+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
@@ -56,5 +64,26 @@ class TestModelPolicyEnforcer(unittest.TestCase):
                         '-5a3d2c8d773e", "name", '
                         '"whjiyi3uzhxes6")' in rules_str)
 
+    def test_convert_model_two_instances(self):
+        rules_str = self._create_rules_str('model_two_instances.yaml')
 
-        pass
+        self.assertFalse("\"instances\"" in rules_str)
+
+        self.assertTrue(
+            'murano_property+("824b1718-09d8-4dd3-be32-9886f0d146d7",'
+            ' "flavor", "m1.medium")' in rules_str)
+
+        self.assertTrue(
+            'murano_property+("afa3266c-e2a7-4822-a176-11a48cdd7949",'
+            ' "flavor", "m1.medium")' in rules_str)
+
+    def test_convert_model_with_relations(self):
+        rules_str = self._create_rules_str('model_with_relations.yaml')
+
+        self.assertFalse(
+            'murano_property+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
+            '"server", "8ce94f23-f16a-40a1-9d9d-a877266c315d")' in rules_str)
+
+        self.assertTrue(
+            'murano_relationship+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
+            '"8ce94f23-f16a-40a1-9d9d-a877266c315d", "server")' in rules_str)
