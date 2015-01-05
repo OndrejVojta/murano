@@ -34,7 +34,7 @@ Using these commands we can create rules in congress to disable instances with
 
 """
 
-from murano.common import congress_rules as congress_rules
+import congress_rules
 
 from murano.openstack.common import log as logging
 

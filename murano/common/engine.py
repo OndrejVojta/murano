@@ -22,7 +22,6 @@ from oslo.serialization import jsonutils
 
 from murano.common import config
 from murano.common.helpers import token_sanitizer
-from murano.common import model_policy_enforcer as enforcer
 from murano.common import rpc
 from murano.dsl import dsl_exception
 from murano.dsl import executor
@@ -36,6 +35,7 @@ from murano.engine.system import status_reporter
 import murano.engine.system.system_objects as system_objects
 from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
+from murano.policy_enf import model_policy_enforcer as enforcer
 
 RPC_SERVICE = None
 

@@ -18,7 +18,7 @@ import json
 import os.path
 import unittest2 as unittest
 
-import murano.common.congress_rules as congress
+import murano.policy_enf.congress_rules as congress
 
 
 class TestModelPolicyEnforcer(unittest.TestCase):
