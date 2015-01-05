@@ -35,6 +35,7 @@ Using these commands we can create rules in congress to disable instances with
 """
 
 import congress_rules
+import json
 
 from murano.openstack.common import log as logging
 
@@ -61,6 +62,8 @@ class ModelPolicyEnforcer(object):
             return
 
         LOG.info('Validating model')
+        LOG.debug(json.dumps(model, sort_keys=True, indent=2,
+                             separators=(',', ': ')))
         rules = congress_rules.CongressRules().convert(model)
         rules_str = " ".join(map(str, rules))
         LOG.debug('Congress rules: ' + rules_str)

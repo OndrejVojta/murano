@@ -35,10 +35,18 @@ class CongressRules(object):
             rules.append(obj)
             rules.extend(self._create_propety_rules(obj.obj_id, app))
 
-            instance = app['instance']
-            obj2 = self._create_object_rule(instance, env_id)
-            rules.extend(self._create_propety_rules(obj2.obj_id, instance))
-            rules.append(obj2)
+            instances = []
+            if 'instance' in app:
+                instances.append(app['instance'])
+
+            if 'instances' in app:
+                instances.extend(app['instances'])
+
+            for instance in instances:
+                obj2 = self._create_object_rule(instance, env_id)
+                rules.extend(self._create_propety_rules(obj2.obj_id,
+                                                        instance))
+                rules.append(obj2)
 
         return rules
 
@@ -49,9 +57,10 @@ class CongressRules(object):
     @staticmethod
     def _create_propety_rules(obj_id, obj):
         rules = []
+        excluded_keys = ['?', 'instance', 'instances']
 
         for key, value in obj.iteritems():
-            if key != '?' and key != 'instance':
+            if not key in excluded_keys:
                 rule = MuranoProperty(obj_id, key, value)
                 rules.append(rule)
 
