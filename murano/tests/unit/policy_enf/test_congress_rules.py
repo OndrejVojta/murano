@@ -28,14 +28,18 @@ class TestModelPolicyEnforcer(unittest.TestCase):
             os.path.dirname(inspect.getfile(self.__class__)), file_name)
         return json.load(open(model_file))
 
-    def test_convert_simple_app(self):
-
-        model = self._load_file('model.json')
+    def _create_rules_str(self, model_file):
+        model = self._load_file(model_file)
 
         congress_rules = congress.CongressRules()
         rules = congress_rules.convert(model)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
+
+        return rules_str
+
+    def test_convert_simple_app(self):
+        rules_str = self._create_rules_str('model.json')
 
         self.assertFalse("\"instance\"" in rules_str)
 
@@ -59,13 +63,7 @@ class TestModelPolicyEnforcer(unittest.TestCase):
                         '"whjiyi3uzhxes6")' in rules_str)
 
     def test_convert_model_two_instances(self):
-
-        model = self._load_file('model_two_instances.json')
-
-        congress_rules = congress.CongressRules()
-        rules = congress_rules.convert(model)
-        rules_str = ", \n".join(map(str, rules))
-        print rules_str
+        rules_str = self._create_rules_str('model_two_instances.json')
 
         self.assertFalse("\"instances\"" in rules_str)
 
@@ -78,13 +76,7 @@ class TestModelPolicyEnforcer(unittest.TestCase):
             ' "flavor", "m1.medium")' in rules_str)
 
     def test_convert_model_with_relations(self):
-
-        model = self._load_file('model_with_relations.json')
-
-        congress_rules = congress.CongressRules()
-        rules = congress_rules.convert(model)
-        rules_str = ", \n".join(map(str, rules))
-        print rules_str
+        rules_str = self._create_rules_str('model_with_relations.json')
 
         self.assertFalse(
             'murano_property+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
