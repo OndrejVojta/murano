@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import contextlib
 
 import uuid
 
@@ -36,6 +37,12 @@ INVALID_FLAVOR_RULE1 = {"rule":
                             'murano_property(obj_id, "flavor", prop_value), '
                             'invalid_flavor_name(prop_value)'}
 
+@contextlib.contextmanager
+def ignored(*exceptions):
+    try:
+        yield
+    except exceptions:
+        pass
 
 CONF = cfg.cfg.CONF
 
@@ -70,7 +77,7 @@ class PolicyEnforcement(testtools.TestCase, testtools.testcase.WithAttributes,
         super(PolicyEnforcement, self).setUp()
 
         self.rules = []
-        with base.ignored(keystone_exceptions.Conflict):
+        with ignored(keystone_exceptions.Conflict):
             self.rules.append(self.congress_client.create_policy_rule(
                 'classification',
                 INVALID_FLAVOR_RULE1))
