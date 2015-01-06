@@ -26,13 +26,14 @@ from muranoclient import client as mclient
 
 import murano.tests.functional.engine.config as cfg
 
-
-INVALID_FLAVOR_RULE2 = {"rule": 'invalid_flavor_name("really.bad.image")'}
-
-INVALID_FLAVOR_RULE1 = {"rule":
-                        'is_valid_model(obj_id) :- '
-                        'murano_property(obj_id, "flavor", prop_value), '
-                        'invalid_flavor_name(prop_value)'}
+CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
+                  'is_valid_model(obj_id) :- '
+                  'murano_property(obj_id, "flavor", prop_value), '
+                  'invalid_flavor_name(prop_value)',
+                  'is_valid_model(obj_id) :- '
+                  'murano_property(obj_id, "keyname", prop_value), '
+                  'missing_key(prop_value)',
+                  'missing_key("")']
 
 
 @contextlib.contextmanager
@@ -73,15 +74,15 @@ class PolicyEnforcement(testtools.TestCase):
 
     def setUp(self):
         super(PolicyEnforcement, self).setUp()
-
         self.rules = []
-        with ignored(keystone_exceptions.Conflict):
-            self.rules.append(self.congress_client.create_policy_rule(
-                'classification',
-                INVALID_FLAVOR_RULE1))
-            self.rules.append(self.congress_client.create_policy_rule(
-                'classification',
-                INVALID_FLAVOR_RULE2))
+        self.environments = []
+
+        rule_posts = [{"rule": rule} for rule in CONGRESS_RULES]
+        for rule_post in rule_posts:
+            with ignored(keystone_exceptions.Conflict):
+                self.rules.append(self.congress_client.create_policy_rule(
+                    'classification',
+                    rule_post))
 
     def tearDown(self):
         super(PolicyEnforcement, self).tearDown()
@@ -89,6 +90,9 @@ class PolicyEnforcement(testtools.TestCase):
         for rule in self.rules:
             self.congress_client.delete_policy_rule(
                 "classification", rule["id"])
+        for env in self.environments:
+            with ignored(Exception):
+                self.muranoclient.environments.delete(env.id)
 
     def wait_for_final_status(self, environment):
         start_time = time.time()
@@ -102,6 +106,7 @@ class PolicyEnforcement(testtools.TestCase):
 
     def deploy_app(self, name, app):
         environment = self.muranoclient.environments.create({'name': name})
+        self.environments.append(environment)
 
         session = self.muranoclient.sessions.configure(environment.id)
 
@@ -113,10 +118,11 @@ class PolicyEnforcement(testtools.TestCase):
         self.muranoclient.sessions.deploy(environment.id, session.id)
         return environment
 
-    def test_deploy_policy_fail(self):
-        post_body = {
+    def create_env_body(self, flavor="really.bad.flavor", key="test-key"):
+        return {
             "instance": {
-                "flavor": "really.bad.image",
+                "flavor": flavor,
+                "keyname": key,
                 "image": CONF.murano.linux_image,
                 "assignFloatingIp": True,
                 "?": {
@@ -132,8 +138,16 @@ class PolicyEnforcement(testtools.TestCase):
             }
         }
 
+    def check_deploy_failure(self, post_body):
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
         env = self.deploy_app(environment_name, post_body)
         status = self.wait_for_final_status(env)
         print status
         self.assertIn("failure", status)
+
+    def test_deploy_policy_fail_flavor(self):
+        self.check_deploy_failure(self.create_env_body())
+
+    def test_deploy_policy_fail_key(self):
+        self.check_deploy_failure(self.create_env_body(key="",
+                                                       flavor="m1.small"))
