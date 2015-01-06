@@ -35,7 +35,6 @@ Using these commands we can create rules in congress to disable instances with
 """
 
 import congress_rules
-import json
 
 from murano.openstack.common import log as logging
 
@@ -52,7 +51,7 @@ class ModelPolicyEnforcer(object):
         self._environment = environment
         self._client_manager = environment.clients
 
-    def validate(self, model):
+    def validate(self, model, class_loader=None):
         """Validate model using Congress rule engine"""
 
         client = self._client_manager.get_congress_client(self._environment)
@@ -62,11 +61,11 @@ class ModelPolicyEnforcer(object):
             return
 
         LOG.info('Validating model')
-        LOG.debug(json.dumps(model, sort_keys=True, indent=2,
-                             separators=(',', ': ')))
-        rules = congress_rules.CongressRules().convert(model)
+        LOG.debug(model)
+
+        rules = congress_rules.CongressRules().convert(model, class_loader)
         rules_str = " ".join(map(str, rules))
-        LOG.debug('Congress rules: ' + rules_str)
+        LOG.debug('Congress rules: \n  ' + "\n  ".join(map(str, rules)) + '\n')
 
         validation_result = client.execute_policy_action(
             "classification",

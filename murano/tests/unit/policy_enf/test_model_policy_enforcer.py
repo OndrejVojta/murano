@@ -24,11 +24,15 @@ from murano.tests.unit import base
 
 
 class TestModelPolicyEnforcer(base.MuranoTestCase):
-    model = {'Objects': None}
+    obj = mock.Mock()
+    class_loader = mock.Mock()
+
+    model_dict = mock.Mock()
+    obj.to_dictionary = mock.Mock(return_value=model_dict)
 
     task = {
         'action': 'action',
-        'model': model,
+        'model': {'Objects': None},
         'token': 'token',
         'tenant_id': 'environment.tenant_id',
         'id': 'environment.id'
@@ -49,27 +53,23 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
     def test_enforcer_disabled(self):
         executor = engine.TaskExecutor(self.task)
-
-        # replace call to inner method to do nothing
-        executor._execute = mock.Mock()
         executor._model_policy_enforcer = mock.Mock()
 
-        executor.execute()
+        config.CONF.engine.enable_model_policy_enforcer = False
+        executor._validate_model(self.obj, self.class_loader)
 
         self.assertFalse(executor._model_policy_enforcer.validate.called)
 
     def test_enforcer_enabled(self):
         executor = engine.TaskExecutor(self.task)
-
-        # replace call to inner method to do nothing
-        executor._execute = mock.Mock()
         executor._model_policy_enforcer = mock.Mock()
 
         config.CONF.engine.enable_model_policy_enforcer = True
-        executor.execute()
+        executor._validate_model(self.obj, self.class_loader)
 
         executor._model_policy_enforcer \
-            .validate.assert_called_once_with(self.model)
+            .validate.assert_called_once_with(self.model_dict,
+                                              self.class_loader)
 
     def test_validation_pass(self):
         self.congress_client_mock.execute_policy_action.return_value = \

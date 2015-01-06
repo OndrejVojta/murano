@@ -14,6 +14,7 @@
 #    under the License.
 
 import inspect
+import mock
 import os.path
 import unittest2 as unittest
 import yaml
@@ -87,3 +88,55 @@ class TestModelPolicyEnforcer(unittest.TestCase):
         self.assertTrue(
             'murano_relationship+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
             '"8ce94f23-f16a-40a1-9d9d-a877266c315d", "server")' in rules_str)
+
+    def test_convert_model_nested(self):
+        self._create_rules_str('model_complex.yaml')
+
+    def test_convert_model_none_value(self):
+        rules_str = self._create_rules_str('model_complex.yaml')
+
+        self.assertTrue(
+            'murano_property+("be3c5155-6670-4cf6-9a28-a4574ff70b71",'
+            ' "floatingIpAddress", "")' in rules_str)
+
+    def test_parent_types(self):
+
+        def my_side_effect(*args):
+            if args[0] == 'io.murano.apps.linux.Git':
+                return cls
+            elif args[0] == 'parent1':
+                return parent1
+            elif args[0] == 'parent2':
+                return parent2
+
+        class_loader = mock.Mock()
+        cls = mock.Mock()
+        parent11 = mock.Mock()
+        parent11.name = 'grand-parent'
+        parent1 = mock.Mock()
+        parent1.name = 'parent1'
+        parent1.parents = [parent11]
+        parent2 = mock.Mock()
+        parent2.name = 'parent2'
+        parent2.parents = [parent11]
+        cls.parents = [parent1, parent2]
+        class_loader.get_class = mock.Mock(side_effect=my_side_effect)
+
+        model = self._load_file('model.yaml')
+
+        congress_rules = congress.CongressRules()
+        rules = congress_rules.convert(model, class_loader)
+        rules_str = ", \n".join(map(str, rules))
+        print rules_str
+
+        self.assertTrue(
+            'murano_parent-type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            ' "parent1")' in rules_str)
+
+        self.assertTrue(
+            'murano_parent-type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            ' "parent2")' in rules_str)
+
+        self.assertTrue(
+            'murano_parent-type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            ' "grand-parent")' in rules_str)
