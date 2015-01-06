@@ -27,7 +27,7 @@ from muranoclient import client as mclient
 import murano.tests.functional.engine.config as cfg
 
 
-INVALID_FLAVOR_RULE2 = {"rule": 'invalid_flavor_name("m1.small")'}
+INVALID_FLAVOR_RULE2 = {"rule": 'invalid_flavor_name("really.bad.image")'}
 
 INVALID_FLAVOR_RULE1 = {"rule":
                         'is_valid_model(obj_id) :- '
@@ -90,14 +90,17 @@ class PolicyEnforcement(testtools.TestCase):
             self.congress_client.delete_policy_rule(
                 "classification", rule["id"])
 
-    def wait_for_failure(self, environment):
+    def wait_for_final_status(self, environment):
         start_time = time.time()
-        while not 'failure' in environment.manager.get(environment.id).status:
+        status = environment.manager.get(environment.id).status
+        while u'deploying' == status:
             if time.time() - start_time > 300:
                 self.fail('Deployment not finished in 300 seconds')
             time.sleep(5)
+            status = environment.manager.get(environment.id).status
+        return status
 
-    def _quick_deploy(self, name, app):
+    def deploy_app(self, name, app):
         environment = self.muranoclient.environments.create({'name': name})
 
         session = self.muranoclient.sessions.configure(environment.id)
@@ -110,10 +113,10 @@ class PolicyEnforcement(testtools.TestCase):
         self.muranoclient.sessions.deploy(environment.id, session.id)
         return environment
 
-    def test_deploy_telnet_policy_fail(self):
+    def test_deploy_policy_fail(self):
         post_body = {
             "instance": {
-                "flavor": "m1.small",
+                "flavor": "really.bad.image",
                 "image": CONF.murano.linux_image,
                 "assignFloatingIp": True,
                 "?": {
@@ -130,5 +133,7 @@ class PolicyEnforcement(testtools.TestCase):
         }
 
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
-        env = self._quick_deploy(environment_name, post_body)
-        self.wait_for_failure(env)
+        env = self.deploy_app(environment_name, post_body)
+        status = self.wait_for_final_status(env)
+        print status
+        self.assertIn("failure", status)
