@@ -52,7 +52,15 @@ class ModelPolicyEnforcer(object):
         self._client_manager = environment.clients
 
     def validate(self, model, class_loader=None):
-        """Validate model using Congress rule engine"""
+        """Validate model using Congress rule engine.
+
+        @type model: dict
+        @param model: Dictionary representation of model starting on
+                      environment level (['Objects'])
+        @type class_loader: murano.dsl.class_loader.MuranoClassLoader
+        @param class_loader: Optional. Used for evaluating parent class types
+        @raises ValidationError in case validation was not successful
+        """
 
         client = self._client_manager.get_congress_client(self._environment)
         if not client:
@@ -77,7 +85,3 @@ class ModelPolicyEnforcer(object):
             raise ValidationError("Model validation failed!")
         else:
             LOG.info('Model valid')
-
-        #raise Exception('Model valid')
-
-        pass

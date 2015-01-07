@@ -18,7 +18,7 @@ Converts murano model to list of congress rules:
     murano_object+(env_id, obj_id, type_name)
     murano_property+(obj_id, prop_name, prop_value)
     murano_relationship+(source, target, name)
-    murano_parent-type(obj_id, parent_name)
+    murano_parent-type+(obj_id, parent_name)
 """
 
 

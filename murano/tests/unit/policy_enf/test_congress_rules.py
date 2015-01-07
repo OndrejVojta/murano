@@ -22,7 +22,7 @@ import yaml
 import murano.policy_enf.congress_rules as congress
 
 
-class TestModelPolicyEnforcer(unittest.TestCase):
+class TestCongressRules(unittest.TestCase):
 
     def _load_file(self, file_name):
         model_file = os.path.join(
