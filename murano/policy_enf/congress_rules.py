@@ -22,20 +22,26 @@ Converts murano model to list of congress rules:
 
 class CongressRules(object):
 
-    def convert(self, model):
+    def convert(self, model, class_loader=None):
         rules = []
 
-        if model is None or 'Objects' not in model:
+        if model is None:
             return rules
 
-        env_id = model['Objects']['?']['id']
+        env_id = model['?']['id']
 
         app_ids = []
-        for app in model['Objects']['applications']:
+        for app in model['applications']:
+            app = self._to_dict(app)
+
             obj = self._create_object_rule(app, env_id)
             app_ids.append(obj.obj_id)
             rules.append(obj)
             rules.extend(self._create_propety_rules(obj.obj_id, app))
+
+            types = self._get_parent_types(app['?']['type'], class_loader)
+            rules.extend(self._create_parent_type_rules(app['?']['id'],
+                                                        types))
 
             instances = []
             if 'instance' in app:
@@ -45,6 +51,8 @@ class CongressRules(object):
                 instances.extend(app['instances'])
 
             for instance in instances:
+                instance = self._to_dict(instance)
+
                 obj2 = self._create_object_rule(instance, env_id)
                 rules.extend(self._create_propety_rules(obj2.obj_id,
                                                         instance))
@@ -57,6 +65,14 @@ class CongressRules(object):
         return rules
 
     @staticmethod
+    def _to_dict(obj):
+        # if we have MuranoObject class we need to convert to dictionary
+        if 'to_dictionary' in dir(obj):
+            return obj.to_dictionary()
+        else:
+            return obj
+
+    @staticmethod
     def _create_object_rule(app, env_id):
         return MuranoObject(app['?']['id'], env_id, app['?']['type'])
 
@@ -67,8 +83,14 @@ class CongressRules(object):
 
         for key, value in obj.iteritems():
             if not key in excluded_keys:
-                rule = MuranoProperty(obj_id, key, value)
-                rules.append(rule)
+
+                if value is None:
+                    value = ""
+
+                #TODO(ondrej.vojta) expand composite properties
+                if not isinstance(value, list) and not isinstance(value, dict):
+                    rule = MuranoProperty(obj_id, key, value)
+                    rules.append(rule)
 
         return rules
 
@@ -85,6 +107,24 @@ class CongressRules(object):
                                       rule.prop_name)
         else:
             return rule
+
+    def _get_parent_types(self, type_name, class_loader):
+        types = set()
+        if class_loader is not None:
+            cls = class_loader.get_class(type_name)
+            if cls is not None:
+                for parent in cls.parents:
+                    types.add(parent.name)
+                    types = types.union(
+                        self._get_parent_types(parent.name, class_loader))
+        return types
+
+    @staticmethod
+    def _create_parent_type_rules(app_id, types):
+        rules = []
+        for type_name in types:
+            rules.append(MuranoParentType(app_id, type_name))
+        return rules
 
 
 class MuranoObject(object):
@@ -118,3 +158,13 @@ class MuranoRelationship(object):
     def __str__(self):
         return 'murano_relationship+("{0}", "{1}", "{2}")' \
             .format(self.source_id, self.target_id, self.rel_name)
+
+
+class MuranoParentType(object):
+    def __init__(self, obj_id, type_name):
+        self.obj_id = obj_id
+        self.type_name = type_name
+
+    def __str__(self):
+        return 'murano_parent-type+("{0}", "{1}")' \
+            .format(self.obj_id, self.type_name)

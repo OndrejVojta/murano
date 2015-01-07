@@ -116,9 +116,6 @@ class TaskExecutor(object):
         self._create_trust()
 
         try:
-            if config.CONF.engine.enable_model_policy_enforcer:
-                self._model_policy_enforcer.validate(self.model)
-
             # pkg_loader = package_loader.DirectoryPackageLoader('./meta')
             # return self._execute(pkg_loader)
 
@@ -138,6 +135,8 @@ class TaskExecutor(object):
         exc = executor.MuranoDslExecutor(class_loader, self.environment)
         obj = exc.load(self.model)
 
+        self._validate_model(obj, class_loader)
+
         try:
             # Skip execution of action in case of no action is provided.
             # Model will be just loaded, cleaned-up and unloaded.
@@ -156,6 +155,11 @@ class TaskExecutor(object):
         result = results_serializer.serialize(obj, exc)
         result['SystemData'] = self._environment.system_attributes
         return result
+
+    def _validate_model(self, obj, class_loader):
+        if config.CONF.engine.enable_model_policy_enforcer:
+            self._model_policy_enforcer.validate(obj.to_dictionary(),
+                                                 class_loader)
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])
