@@ -90,7 +90,30 @@ class TestModelPolicyEnforcer(unittest.TestCase):
             '"8ce94f23-f16a-40a1-9d9d-a877266c315d", "server")' in rules_str)
 
     def test_convert_model_nested(self):
-        self._create_rules_str('model_complex.yaml')
+        rules_str = self._create_rules_str('model_complex.yaml')
+
+        self.assertTrue(
+            'murano_property+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97",'
+            ' "networks.customProp1.prop", "val")' in rules_str)
+
+    def test_convert_model_list_value(self):
+        rules_str = self._create_rules_str('model_complex.yaml')
+
+        self.assertTrue(
+            'murano_property+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97",'
+            ' "ipAddresses", "10.0.1.13")' in rules_str)
+
+        self.assertTrue(
+            'murano_property+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97",'
+            ' "ipAddresses", "16.60.90.90")' in rules_str)
+
+        self.assertTrue(
+            'murano_property+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97",'
+            ' "networks.customNetworks", "10.0.1.0")' in rules_str)
+
+        self.assertTrue(
+            'murano_property+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97",'
+            ' "networks.customNetworks", "10.0.2.0")' in rules_str)
 
     def test_convert_model_none_value(self):
         rules_str = self._create_rules_str('model_complex.yaml')
@@ -100,6 +123,12 @@ class TestModelPolicyEnforcer(unittest.TestCase):
             ' "floatingIpAddress", "")' in rules_str)
 
     def test_parent_types(self):
+
+        #     grand-parent
+        #       /     \
+        #  parent1   parent2
+        #       \     /
+        # io.murano.apps.linux.Git
 
         def my_side_effect(*args):
             if args[0] == 'io.murano.apps.linux.Git':
@@ -111,14 +140,14 @@ class TestModelPolicyEnforcer(unittest.TestCase):
 
         class_loader = mock.Mock()
         cls = mock.Mock()
-        parent11 = mock.Mock()
-        parent11.name = 'grand-parent'
+        grand = mock.Mock()
+        grand.name = 'grand-parent'
         parent1 = mock.Mock()
         parent1.name = 'parent1'
-        parent1.parents = [parent11]
+        parent1.parents = [grand]
         parent2 = mock.Mock()
         parent2.name = 'parent2'
-        parent2.parents = [parent11]
+        parent2.parents = [grand]
         cls.parents = [parent1, parent2]
         class_loader.get_class = mock.Mock(side_effect=my_side_effect)
 

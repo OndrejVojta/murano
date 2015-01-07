@@ -17,6 +17,8 @@
 Converts murano model to list of congress rules:
     murano_object+(env_id, obj_id, type_name)
     murano_property+(obj_id, prop_name, prop_value)
+    murano_relationship+(source, target, name)
+    murano_parent-type(obj_id, parent_name)
 """
 
 
@@ -76,21 +78,27 @@ class CongressRules(object):
     def _create_object_rule(app, env_id):
         return MuranoObject(app['?']['id'], env_id, app['?']['type'])
 
-    @staticmethod
-    def _create_propety_rules(obj_id, obj):
+    def _create_propety_rules(self, obj_id, obj, prefix=""):
         rules = []
         excluded_keys = ['?', 'instance', 'instances']
 
         for key, value in obj.iteritems():
-            if not key in excluded_keys:
+            if key in excluded_keys:
+                continue
 
-                if value is None:
-                    value = ""
+            if value is None:
+                value = ""
 
-                #TODO(ondrej.vojta) expand composite properties
-                if not isinstance(value, list) and not isinstance(value, dict):
-                    rule = MuranoProperty(obj_id, key, value)
+            if isinstance(value, dict):
+                rules.extend(self._create_propety_rules(
+                    obj_id, value, prefix + key + "."))
+            elif isinstance(value, list):
+                for v in value:
+                    rule = MuranoProperty(obj_id, prefix + key, v)
                     rules.append(rule)
+            else:
+                rule = MuranoProperty(obj_id, prefix + key, value)
+                rules.append(rule)
 
         return rules
 

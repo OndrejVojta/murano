@@ -24,14 +24,16 @@ applications:
     flavor: m1.medium
     floatingIpAddress: null
     image: murano-ubuntu
-    ipAddresses: []
+    ipAddresses: [10.0.1.13, 16.60.90.90]
     keyname: ''
     name: bmtjbi4jn23l89
     networks:
-      customNetworks: []
+      customNetworks: [10.0.1.0, 10.0.2.0]
       primaryNetwork: null
       useEnvironmentNetwork: true
       useFlatNetwork: false
+      customProp1:
+        prop: val
     securityGroupName: null
     sharedIps: []
   name: Tomcat
