@@ -18,6 +18,8 @@ try:
     import congressclient.v1.client as cclient
 except ImportError:
     cclient = None
+    if  config.CONF.engine.enable_model_policy_enforcer:
+        raise
 
 from eventlet import semaphore
 import heatclient.client as hclient
