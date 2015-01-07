@@ -142,8 +142,7 @@ class PolicyEnforcement(testtools.TestCase):
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
         env = self.deploy_app(environment_name, post_body)
         status = self.wait_for_final_status(env)
-        print status
-        self.assertIn("failure", status)
+        self.assertIn("failure", status, "Unexpected status : " + status)
 
     def test_deploy_policy_fail_flavor(self):
         self.check_deploy_failure(self.create_env_body())

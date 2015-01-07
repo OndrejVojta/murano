@@ -64,9 +64,7 @@ class ModelPolicyEnforcer(object):
 
         client = self._client_manager.get_congress_client(self._environment)
         if not client:
-            LOG.info('Congress client is not configured'
-                     ' - skipping model validation')
-            return
+            raise ValueError('Congress client is not configured!')
 
         LOG.info('Validating model')
         LOG.debug(model)
