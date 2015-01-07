@@ -12,15 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-try:
-    # integration with congress is optional
-    import congressclient.v1.client as cclient
-except ImportError:
-    cclient = None
-    if  config.CONF.engine.enable_model_policy_enforcer:
-        raise
-
 from eventlet import semaphore
 import heatclient.client as hclient
 import keystoneclient
@@ -32,6 +23,14 @@ from murano.common import config
 from murano.dsl import helpers
 from murano.engine import auth_utils
 from murano.engine import environment
+
+try:
+    # integration with congress is optional
+    import congressclient.v1.client as cclient
+except ImportError:
+    cclient = None
+    if config.CONF.engine.enable_model_policy_enforcer:
+        raise
 
 
 class ClientManager(object):
