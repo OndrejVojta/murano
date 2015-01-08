@@ -27,7 +27,7 @@ Example:
 Using these commands we can create rules in congress to disable instances with
 "m1.small" flavor:
 
->congress policy rule create classification "predeploy_error(\"m1.small\")"
+>congress policy rule create classification "invalid_flavor_name(\"m1.small\")"
 >congress policy rule create classification
   "predeploy_error(obj_id) :- murano_property(obj_id, \"flavor\", prop_value),
    invalid_flavor_name(prop_value)"
