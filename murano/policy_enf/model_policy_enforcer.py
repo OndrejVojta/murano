@@ -20,17 +20,17 @@ Converts murano model to list of congress rules:
     murano_object+(env_id, obj_id, type_name)
     murano_property+(obj_id, prop_name, prop_value)
 
-Then we ask congress to resolve "is_valid_model(x)" table to return validation
+Then we ask congress to resolve "predeploy_error(x)" table to return validation
 results.
 
 Example:
 Using these commands we can create rules in congress to disable instances with
 "m1.small" flavor:
 
->congress policy rule create classification "invalid_flavor_name(\"m1.small\")"
+>congress policy rule create classification "predeploy_error(\"m1.small\")"
 >congress policy rule create classification
-    "is_valid_model(obj_id) :- murano_property(obj_id, \"flavor\", prop_value),
-    invalid_flavor_name(prop_value)"
+  "predeploy_error(obj_id) :- murano_property(obj_id, \"flavor\", prop_value),
+   invalid_flavor_name(prop_value)"
 
 """
 
@@ -76,7 +76,7 @@ class ModelPolicyEnforcer(object):
         validation_result = client.execute_policy_action(
             "classification",
             "simulate",
-            {'query': 'is_valid_model(x)', 'action_policy': 'action',
+            {'query': 'predeploy_error(x)', 'action_policy': 'action',
             'sequence': rules_str})
 
         if validation_result["result"]:
