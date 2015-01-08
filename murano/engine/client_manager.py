@@ -79,9 +79,11 @@ class ClientManager(object):
         return self._get_client(context, 'keystone', use_trusts, factory)
 
     def get_congress_client(self, context, use_trusts=True):
-        if "congress_client_import_error" in globals():
-            # python congress client is not imported
+        try:
             raise congress_client_import_error
+        except NameError:
+            # congress client was successfully imported
+            pass
         if not config.CONF.engine.use_trusts:
             use_trusts = False
 
