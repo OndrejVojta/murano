@@ -27,8 +27,8 @@ from murano.engine import environment
 try:
     # integration with congress is optional
     import congressclient.v1.client as cclient
-except ImportError:
-    cclient = None
+except ImportError as import_error:
+    congress_client_import_error = import_error
 
 
 class ClientManager(object):
@@ -79,9 +79,9 @@ class ClientManager(object):
         return self._get_client(context, 'keystone', use_trusts, factory)
 
     def get_congress_client(self, context, use_trusts=True):
-        if not cclient:
-            # python congress client not configured
-            return None
+        if "congress_client_import_error" in globals():
+            # python congress client is not imported
+            raise congress_client_import_error
         if not config.CONF.engine.use_trusts:
             use_trusts = False
 
