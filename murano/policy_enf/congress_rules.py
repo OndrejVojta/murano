@@ -15,10 +15,10 @@
 
 """
 Converts murano model to list of congress rules:
-    murano_object+(env_id, obj_id, type_name)
-    murano_property+(obj_id, prop_name, prop_value)
-    murano_relationship+(source, target, name)
-    murano_parent-type+(obj_id, parent_name)
+    murano:object+(env_id, obj_id, type_name)
+    murano:property+(obj_id, prop_name, prop_value)
+    murano:relationship+(source, target, name)
+    murano:parent-type+(obj_id, parent_name)
 """
 
 
@@ -142,7 +142,7 @@ class MuranoObject(object):
         self.type_name = type_name
 
     def __str__(self):
-        return 'murano_object+("{0}", "{1}", "{2}")'\
+        return 'murano:object+("{0}", "{1}", "{2}")'\
             .format(self.obj_id, self.env_id, self.type_name)
 
 
@@ -153,7 +153,7 @@ class MuranoProperty(object):
         self.prop_value = prop_value
 
     def __str__(self):
-        return 'murano_property+("{0}", "{1}", "{2}")' \
+        return 'murano:property+("{0}", "{1}", "{2}")' \
             .format(self.obj_id, self.prop_name, self.prop_value)
 
 
@@ -164,7 +164,7 @@ class MuranoRelationship(object):
         self.rel_name = rel_name
 
     def __str__(self):
-        return 'murano_relationship+("{0}", "{1}", "{2}")' \
+        return 'murano:relationship+("{0}", "{1}", "{2}")' \
             .format(self.source_id, self.target_id, self.rel_name)
 
 
@@ -174,5 +174,5 @@ class MuranoParentType(object):
         self.type_name = type_name
 
     def __str__(self):
-        return 'murano_parent-type+("{0}", "{1}")' \
+        return 'murano:parent-type+("{0}", "{1}")' \
             .format(self.obj_id, self.type_name)

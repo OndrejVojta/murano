@@ -17,8 +17,8 @@
 Policy Enforcer Implementation using Congress client
 
 Converts murano model to list of congress rules:
-    murano_object+(env_id, obj_id, type_name)
-    murano_property+(obj_id, prop_name, prop_value)
+    murano:object+(env_id, obj_id, type_name)
+    murano:property+(obj_id, prop_name, prop_value)
 
 Then we ask congress to resolve "predeploy_error(x)" table to return validation
 results.
@@ -27,9 +27,11 @@ Example:
 Using these commands we can create rules in congress to disable instances with
 "m1.small" flavor:
 
->congress policy rule create classification "invalid_flavor_name(\"m1.small\")"
->congress policy rule create classification
-  "predeploy_error(obj_id) :- murano_property(obj_id, \"flavor\", prop_value),
+>congress policy create murano
+>congress policy create murano_system
+>congress policy rule create murano_system "invalid_flavor_name(\"m1.small\")"
+>congress policy rule create murano_system
+  "predeploy_error(obj_id) :- murano:property(obj_id, \"flavor\", prop_value),
    invalid_flavor_name(prop_value)"
 
 """
@@ -74,7 +76,7 @@ class ModelPolicyEnforcer(object):
         LOG.debug('Congress rules: \n  ' + "\n  ".join(map(str, rules)) + '\n')
 
         validation_result = client.execute_policy_action(
-            "classification",
+            "murano_system",
             "simulate",
             {'query': 'predeploy_error(x)', 'action_policy': 'action',
             'sequence': rules_str})

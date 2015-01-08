@@ -26,6 +26,8 @@ from muranoclient import client as mclient
 
 import murano.tests.functional.engine.config as cfg
 
+#TODO(ovo) create policy 'murano' and 'murano_system'
+
 CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
                   'predeploy_error(obj_id) :- '
                   'murano_property(obj_id, "flavor", prop_value), '
@@ -81,7 +83,7 @@ class PolicyEnforcement(testtools.TestCase):
         for rule_post in rule_posts:
             with ignored(keystone_exceptions.Conflict):
                 self.rules.append(self.congress_client.create_policy_rule(
-                    'classification',
+                    'murano_system',
                     rule_post))
 
     def tearDown(self):
@@ -89,7 +91,7 @@ class PolicyEnforcement(testtools.TestCase):
 
         for rule in self.rules:
             self.congress_client.delete_policy_rule(
-                "classification", rule["id"])
+                "murano_system", rule["id"])
         for env in self.environments:
             with ignored(Exception):
                 self.muranoclient.environments.delete(env.id)
