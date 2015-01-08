@@ -27,10 +27,10 @@ from muranoclient import client as mclient
 import murano.tests.functional.engine.config as cfg
 
 CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
-                  'is_valid_model(obj_id) :- '
+                  'predeploy_error(obj_id) :- '
                   'murano_property(obj_id, "flavor", prop_value), '
                   'invalid_flavor_name(prop_value)',
-                  'is_valid_model(obj_id) :- '
+                  'predeploy_error(obj_id) :- '
                   'murano_property(obj_id, "keyname", prop_value), '
                   'missing_key(prop_value)',
                   'missing_key("")']
