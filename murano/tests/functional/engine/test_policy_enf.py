@@ -104,7 +104,11 @@ class PolicyEnforcement(testtools.TestCase):
                 self.fail('Deployment not finished in 300 seconds')
             time.sleep(5)
             status = environment.manager.get(environment.id).status
-        return status
+        dep = environment.manager.api.deployments.list(environment.id)
+        reports = environment.manager.api.deployments.reports(environment.id,
+                                                              dep[0].id)
+
+        return status, ", ".join([r.text for r in reports])
 
     def _deploy_app(self, name, app):
         environment = self.muranoclient.environments.create({'name': name})
@@ -144,7 +148,9 @@ class PolicyEnforcement(testtools.TestCase):
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
         env = self._deploy_app(environment_name, post_body)
         status = self._wait_for_final_status(env)
-        self.assertIn("failure", status, "Unexpected status : " + status)
+        self.assertIn("failure", status[0], "Unexpected status : " + status[0])
+        self.assertIn("model validation", status[1].lower(),
+                      "Unexpected status : " + status[1])
 
     def test_deploy_policy_fail_flavor(self):
         self._check_deploy_failure(self._create_env_body())
