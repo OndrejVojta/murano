@@ -96,7 +96,7 @@ class PolicyEnforcement(testtools.TestCase):
             with ignored(Exception):
                 self.muranoclient.environments.delete(env.id)
 
-    def wait_for_final_status(self, environment):
+    def _wait_for_final_status(self, environment):
         start_time = time.time()
         status = environment.manager.get(environment.id).status
         while u'deploying' == status:
@@ -106,7 +106,7 @@ class PolicyEnforcement(testtools.TestCase):
             status = environment.manager.get(environment.id).status
         return status
 
-    def deploy_app(self, name, app):
+    def _deploy_app(self, name, app):
         environment = self.muranoclient.environments.create({'name': name})
         self.environments.append(environment)
 
@@ -120,7 +120,7 @@ class PolicyEnforcement(testtools.TestCase):
         self.muranoclient.sessions.deploy(environment.id, session.id)
         return environment
 
-    def create_env_body(self, flavor="really.bad.flavor", key="test-key"):
+    def _create_env_body(self, flavor="really.bad.flavor", key="test-key"):
         return {
             "instance": {
                 "flavor": flavor,
@@ -140,15 +140,15 @@ class PolicyEnforcement(testtools.TestCase):
             }
         }
 
-    def check_deploy_failure(self, post_body):
+    def _check_deploy_failure(self, post_body):
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
-        env = self.deploy_app(environment_name, post_body)
-        status = self.wait_for_final_status(env)
+        env = self._deploy_app(environment_name, post_body)
+        status = self._wait_for_final_status(env)
         self.assertIn("failure", status, "Unexpected status : " + status)
 
     def test_deploy_policy_fail_flavor(self):
-        self.check_deploy_failure(self.create_env_body())
+        self._check_deploy_failure(self._create_env_body())
 
     def test_deploy_policy_fail_key(self):
-        self.check_deploy_failure(self.create_env_body(key="",
+        self._check_deploy_failure(self._create_env_body(key="",
                                                        flavor="m1.small"))
