@@ -124,7 +124,7 @@ class PolicyEnforcement(testtools.TestCase):
         self.muranoclient.sessions.deploy(environment.id, session.id)
         return environment
 
-    def _create_env_body(self, flavor="really.bad.flavor", key="test-key"):
+    def _create_env_body(self, flavor, key):
         return {
             "instance": {
                 "flavor": flavor,
@@ -153,8 +153,9 @@ class PolicyEnforcement(testtools.TestCase):
                       "Unexpected status : " + status[1])
 
     def test_deploy_policy_fail_flavor(self):
-        self._check_deploy_failure(self._create_env_body())
+        self._check_deploy_failure(self._create_env_body(
+            flavor="really.bad.flavor", key="test-key"))
 
     def test_deploy_policy_fail_key(self):
-        self._check_deploy_failure(self._create_env_body(key="",
-                                                       flavor="m1.small"))
+        self._check_deploy_failure(self._create_env_body(
+            key="", flavor="m1.small"))
