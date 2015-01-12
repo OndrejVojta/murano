@@ -13,29 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-Policy Enforcer Implementation using Congress client
-
-Converts murano model to list of congress rules:
-    murano:object+(env_id, obj_id, type_name)
-    murano:property+(obj_id, prop_name, prop_value)
-
-Then we ask congress to resolve "predeploy_error(x)" table to return validation
-results.
-
-Example:
-Using these commands we can create rules in congress to disable instances with
-"m1.small" flavor:
-
->congress policy create murano
->congress policy create murano_system
->congress policy rule create murano_system "invalid_flavor_name(\"m1.small\")"
->congress policy rule create murano_system
-  "predeploy_error(obj_id) :- murano:property(obj_id, \"flavor\", prop_value),
-   invalid_flavor_name(prop_value)"
-
-"""
-
 import congress_rules
 
 from murano.openstack.common import log as logging
@@ -48,6 +25,27 @@ class ValidationError(Exception):
 
 
 class ModelPolicyEnforcer(object):
+    """Policy Enforcer Implementation using Congress client
+
+    Converts murano model to list of congress rules:
+        murano:object+(env_id, obj_id, type_name)
+        murano:property+(obj_id, prop_name, prop_value)
+
+    Then we ask congress to resolve "predeploy_error(x)" table to return
+    validation results.
+
+    Example:
+        Using these commands we can create rules in congress to disable
+        instances with "m1.small" flavor:
+            - congress policy create murano
+            - congress policy create murano_system
+            - congress policy rule create murano_system \
+                "invalid_flavor_name(\"m1.small\")"
+            - congress policy rule create murano_system
+                "predeploy_error(obj_id) :-
+                murano:property(obj_id, \"flavor\", prop_value),
+                invalid_flavor_name(prop_value)"
+    """
 
     def __init__(self, environment):
         self._environment = environment

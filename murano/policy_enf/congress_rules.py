@@ -13,16 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-Converts murano model to list of congress rules:
-    murano:object+(env_id, obj_id, type_name)
-    murano:property+(obj_id, prop_name, prop_value)
-    murano:relationship+(source, target, name)
-    murano:parent-type+(obj_id, parent_name)
-"""
-
 
 class CongressRules(object):
+    """Converts murano model to list of congress rules:
+        - murano:object+(env_id, obj_id, type_name)
+        - murano:property+(obj_id, prop_name, prop_value)
+        - murano:relationship+(source, target, name)
+        - murano:parent-type+(obj_id, parent_name)
+    """
 
     _rules = []
     _env_id = ''
