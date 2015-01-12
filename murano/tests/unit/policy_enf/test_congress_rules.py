@@ -194,3 +194,35 @@ class TestCongressRules(unittest.TestCase):
         self.assertTrue(
             'murano:parent-type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "grand-parent")' in rules_str)
+
+    def test_to_dictionary(self):
+        """If model contains object entry (not dict)
+        we try to convert to dict using 'to_dictionary' method.
+        """
+
+        class Struct(object):
+            def __init__(self, d):
+                self.__dict__ = d
+
+            def to_dictionary(self):
+                return self.__dict__
+
+            def __getitem__(self, item):
+                return self.__dict__[item]
+
+        d = {'?': {'id': '1', 'type': 't1'},
+             'apps': [Struct({'?': {'id': '2', 'type': 't2'},
+                              'instances': [Struct(
+                                  {'?': {'id': '3', 'type': 't3'}})]})]
+             }
+
+        model = Struct(d)
+
+        congress_rules = congress.CongressRules()
+        rules = congress_rules.convert(model)
+        rules_str = ", \n".join(map(str, rules))
+        print rules_str
+
+        self.assertTrue('murano:object+("1", "1", "t1")' in rules_str)
+        self.assertTrue('murano:object+("2", "1", "t2")' in rules_str)
+        self.assertTrue('murano:object+("3", "1", "t3")' in rules_str)
