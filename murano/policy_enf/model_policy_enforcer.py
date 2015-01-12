@@ -62,6 +62,9 @@ class ModelPolicyEnforcer(object):
         @raises ValidationError in case validation was not successful
         """
 
+        if model is None:
+            return
+
         client = self._client_manager.get_congress_client(self._environment)
         if not client:
             raise ValueError('Congress client is not configured!')

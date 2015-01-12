@@ -74,14 +74,15 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
     def test_validation_pass(self):
         self.congress_client_mock.execute_policy_action.return_value = \
             {"result": []}
-
+        model = {'?': {'id': '123', 'type': 'class'}}
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
-        enforcer.validate(None)
+        enforcer.validate(model)
 
     def test_validation_failure(self):
         self.congress_client_mock.execute_policy_action.return_value = \
             {"result": ["failure"]}
 
+        model = {'?': {'id': '123', 'type': 'class'}}
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
         self.assertRaises(model_policy_enforcer.ValidationError,
-                          enforcer.validate, None)
+                          enforcer.validate, model)

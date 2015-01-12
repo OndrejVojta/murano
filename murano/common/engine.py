@@ -158,8 +158,9 @@ class TaskExecutor(object):
 
     def _validate_model(self, obj, class_loader):
         if config.CONF.engine.enable_model_policy_enforcer:
-            self._model_policy_enforcer.validate(obj.to_dictionary(),
-                                                 class_loader)
+            if obj is not None:
+                self._model_policy_enforcer.validate(obj.to_dictionary(),
+                                                     class_loader)
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])
