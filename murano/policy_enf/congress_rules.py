@@ -49,6 +49,11 @@ class CongressRules(object):
         return self._rules
 
     def _walk(self, obj, func):
+
+        if obj is None:
+            return
+
+        obj = self._to_dict(obj)
         func(obj)
         if isinstance(obj, list):
             for v in obj:
@@ -58,15 +63,14 @@ class CongressRules(object):
                 self._walk(value, func)
 
     def _process_item(self, obj):
-        d = self._to_dict(obj)
-        if isinstance(d, dict) and '?' in d:
-            obj2 = self._create_object_rule(d, self._env_id)
+        if isinstance(obj, dict) and '?' in obj:
+            obj2 = self._create_object_rule(obj, self._env_id)
             self._rules.append(obj2)
-            self._rules.extend(self._create_propety_rules(obj2.obj_id, d))
+            self._rules.extend(self._create_propety_rules(obj2.obj_id, obj))
 
-            cls = d['?']['type']
+            cls = obj['?']['type']
             types = self._get_parent_types(cls, self._class_loader)
-            self._rules.extend(self._create_parent_type_rules(d['?']['id'],
+            self._rules.extend(self._create_parent_type_rules(obj['?']['id'],
                                                               types))
 
     @staticmethod
@@ -95,11 +99,13 @@ class CongressRules(object):
             if value is None:
                 value = ""
 
+            value = self._to_dict(value)
             if isinstance(value, dict):
                 rules.extend(self._create_propety_rules(
                     obj_id, value, prefix + key + "."))
             elif isinstance(value, list):
                 for v in value:
+                    v = self._to_dict(v)
                     if not isinstance(v, dict):
                         rule = MuranoProperty(obj_id, prefix + key, v)
                         rules.append(rule)
