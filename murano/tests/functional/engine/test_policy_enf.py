@@ -153,9 +153,13 @@ class PolicyEnforcement(testtools.TestCase):
                       "Unexpected status : " + status[1])
 
     def test_deploy_policy_fail_flavor(self):
+        """test expects failure due to blacklisted flavor"""
+
         self._check_deploy_failure(self._create_env_body(
             flavor="really.bad.flavor", key="test-key"))
 
     def test_deploy_policy_fail_key(self):
+        """test expects failure due to empty key name"""
+
         self._check_deploy_failure(self._create_env_body(
             key="", flavor="m1.small"))
