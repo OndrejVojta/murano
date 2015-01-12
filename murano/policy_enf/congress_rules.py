@@ -24,47 +24,50 @@ Converts murano model to list of congress rules:
 
 class CongressRules(object):
 
+    _rules = []
+    _env_id = ''
+    _class_loader = None
+
     def convert(self, model, class_loader=None):
-        rules = []
+        self._rules = []
+        self._class_loader = class_loader
 
         if model is None:
-            return rules
+            return self._rules
 
-        env_id = model['?']['id']
-
-        app_ids = []
-        for app in model['applications']:
-            app = self._to_dict(app)
-
-            obj = self._create_object_rule(app, env_id)
-            app_ids.append(obj.obj_id)
-            rules.append(obj)
-            rules.extend(self._create_propety_rules(obj.obj_id, app))
-
-            types = self._get_parent_types(app['?']['type'], class_loader)
-            rules.extend(self._create_parent_type_rules(app['?']['id'],
-                                                        types))
-
-            instances = []
-            if 'instance' in app:
-                instances.append(app['instance'])
-
-            if 'instances' in app:
-                instances.extend(app['instances'])
-
-            for instance in instances:
-                instance = self._to_dict(instance)
-
-                obj2 = self._create_object_rule(instance, env_id)
-                rules.extend(self._create_propety_rules(obj2.obj_id,
-                                                        instance))
-                rules.append(obj2)
+        self._env_id = model['?']['id']
+        self._walk(model, self._process_item)
 
         # convert MuranoProperty containing reference to another object
         # to MuranoRelationship
-        rules = [self._create_relationship(rule, app_ids) for rule in rules]
+        object_ids = [rule.obj_id for rule in self._rules
+                      if isinstance(rule, MuranoObject)]
 
-        return rules
+        self._rules = [self._create_relationship(rule, object_ids)
+                       for rule in self._rules]
+
+        return self._rules
+
+    def _walk(self, obj, func):
+        func(obj)
+        if isinstance(obj, list):
+            for v in obj:
+                self._walk(v, func)
+        elif isinstance(obj, dict):
+            for key, value in obj.iteritems():
+                self._walk(value, func)
+
+    def _process_item(self, obj):
+        d = self._to_dict(obj)
+        if isinstance(d, dict) and '?' in d:
+            obj2 = self._create_object_rule(d, self._env_id)
+            self._rules.append(obj2)
+            self._rules.extend(self._create_propety_rules(obj2.obj_id, d))
+
+            cls = d['?']['type']
+            types = self._get_parent_types(cls, self._class_loader)
+            self._rules.extend(self._create_parent_type_rules(d['?']['id'],
+                                                              types))
 
     @staticmethod
     def _to_dict(obj):
@@ -80,10 +83,13 @@ class CongressRules(object):
 
     def _create_propety_rules(self, obj_id, obj, prefix=""):
         rules = []
-        excluded_keys = ['?', 'instance', 'instances']
+
+        # skip when inside properties of other object
+        if '?' in obj and prefix != "":
+            return rules
 
         for key, value in obj.iteritems():
-            if key in excluded_keys:
+            if key == '?':
                 continue
 
             if value is None:
@@ -94,8 +100,9 @@ class CongressRules(object):
                     obj_id, value, prefix + key + "."))
             elif isinstance(value, list):
                 for v in value:
-                    rule = MuranoProperty(obj_id, prefix + key, v)
-                    rules.append(rule)
+                    if not isinstance(v, dict):
+                        rule = MuranoProperty(obj_id, prefix + key, v)
+                        rules.append(rule)
             else:
                 rule = MuranoProperty(obj_id, prefix + key, value)
                 rules.append(rule)

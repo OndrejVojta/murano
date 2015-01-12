@@ -45,6 +45,7 @@ class TestCongressRules(unittest.TestCase):
         rules_str = self._create_rules_str('model.yaml')
 
         self.assertFalse("\"instance\"" in rules_str)
+        self.assertFalse("instance." in rules_str)
 
         self.assertTrue(
             'murano:object+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
@@ -121,6 +122,30 @@ class TestCongressRules(unittest.TestCase):
         self.assertTrue(
             'murano:property+("be3c5155-6670-4cf6-9a28-a4574ff70b71",'
             ' "floatingIpAddress", "")' in rules_str)
+
+    def test_convert_renamed_app(self):
+        rules_str = self._create_rules_str('model_renamed.yaml')
+
+        self.assertFalse("\"hostedOn\"" in rules_str)
+
+        self.assertTrue(
+            'murano:object+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            ' "c86104748a0c4907b4c5981e6d3bce9f", '
+            '"io.murano.apps.linux.Git")' in rules_str)
+
+        self.assertTrue(
+            'murano:property+("0c810278-7282-4e4a-9d69'
+            '-7b4c36b6ce6f", "name", "git1")' in rules_str)
+
+        self.assertTrue(
+            'murano:object+("b840b71e-1805-46c5-9e6f-5a3d2c8d773e",'
+            ' "c86104748a0c4907b4c5981e6d3bce9f", '
+            '"io.murano.resources.LinuxMuranoInstance")'
+            in rules_str)
+
+        self.assertTrue('murano:property+("b840b71e-1805-46c5-9e6f'
+                        '-5a3d2c8d773e", "name", '
+                        '"whjiyi3uzhxes6")' in rules_str)
 
     def test_parent_types(self):
 
