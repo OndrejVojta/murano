@@ -41,6 +41,11 @@ class TestCongressRules(unittest.TestCase):
 
         return rules_str
 
+    def test_empty_model(self):
+        congress_rules = congress.CongressRules()
+        rules = congress_rules.convert(None)
+        self.assertTrue(len(rules) == 0)
+
     def test_convert_simple_app(self):
         rules_str = self._create_rules_str('model.yaml')
 
