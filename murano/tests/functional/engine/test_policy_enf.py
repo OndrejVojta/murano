@@ -17,6 +17,8 @@ import contextlib
 import keystoneclient
 import keystoneclient.openstack.common.apiclient.exceptions \
     as keystone_exceptions
+import muranoclient.common.exceptions as murano_exceptions
+import os
 import testtools
 import time
 import uuid
@@ -73,6 +75,32 @@ class PolicyEnforcement(testtools.TestCase):
         cls.muranoclient = mclient.Client('1',
                                           endpoint=CONF.murano.murano_url,
                                           token=keystone_client.auth_token)
+
+        # TODO(FilipBlaha) refactor helper methods to common module
+        # to share code with base.py test
+        cls.pkgs_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__),
+            os.path.pardir,
+            'murano-app-incubator'
+        ))
+
+        def upload_package(package_name, body, app):
+            files = {'%s' % package_name: open(app, 'rb')}
+            return cls.muranoclient.packages.create(body, files)
+
+        cls.packages = []
+        with ignored(murano_exceptions.HTTPInternalServerError):
+            cls.packages.append(
+                upload_package('Telnet',
+                               {"categories": ["Web"], "tags": ["tag"]},
+                               os.path.join(cls.pkgs_path,
+                                            'io.murano.apps.linux.Telnet.zip'))
+            )
+
+    @classmethod
+    def tearDownClass(cls):
+        for package in cls.packages:
+            cls.muranoclient.packages.delete(package.id)
 
     def setUp(self):
         super(PolicyEnforcement, self).setUp()
