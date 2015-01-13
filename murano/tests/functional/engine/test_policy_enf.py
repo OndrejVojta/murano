@@ -12,21 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import congressclient.v1.client as cclient
-import contextlib
-import keystoneclient
+import common
 import keystoneclient.openstack.common.apiclient.exceptions \
     as keystone_exceptions
 import muranoclient.common.exceptions as murano_exceptions
-import os
 import testtools
 import time
 import uuid
 
-from keystoneclient.v2_0 import client as ksclient
-from muranoclient import client as mclient
-
-import murano.tests.functional.engine.config as cfg
 
 #TODO(ovo) create policy 'murano' and 'murano_system'
 
@@ -40,62 +33,18 @@ CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
                   'missing_key("")']
 
 
-@contextlib.contextmanager
-def ignored(*exceptions):
-    try:
-        yield
-    except exceptions:
-        pass
-
-CONF = cfg.cfg.CONF
-
-
-class PolicyEnforcement(testtools.TestCase):
+class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
 
     @classmethod
     def setUpClass(cls):
         super(PolicyEnforcement, cls).setUpClass()
 
-        cfg.load_config()
-
-        keystone_client = ksclient.Client(username=CONF.murano.user,
-                                          password=CONF.murano.password,
-                                          tenant_name=CONF.murano.tenant,
-                                          auth_url=CONF.murano.auth_url)
-
-        auth = keystoneclient.auth.identity.v2.Password(
-            auth_url=CONF.murano.auth_url,
-            username=CONF.murano.user,
-            password=CONF.murano.password,
-            tenant_name=CONF.murano.tenant)
-        session = keystoneclient.session.Session(auth=auth)
-        cls.congress_client = cclient.Client(session=session,
-                                             service_type='policy')
-
-        cls.muranoclient = mclient.Client('1',
-                                          endpoint=CONF.murano.murano_url,
-                                          token=keystone_client.auth_token)
-
-        # TODO(FilipBlaha) refactor helper methods to common module
-        # to share code with base.py test
-        cls.pkgs_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__),
-            os.path.pardir,
-            'murano-app-incubator'
-        ))
-
-        def upload_package(package_name, body, app):
-            files = {'%s' % package_name: open(app, 'rb')}
-            return cls.muranoclient.packages.create(body, files)
+        cls.congressclient = cls.congress_client()
+        cls.muranoclient = cls.murano_client()
 
         cls.packages = []
-        with ignored(murano_exceptions.HTTPInternalServerError):
-            cls.packages.append(
-                upload_package('Telnet',
-                               {"categories": ["Web"], "tags": ["tag"]},
-                               os.path.join(cls.pkgs_path,
-                                            'io.murano.apps.linux.Telnet.zip'))
-            )
+        with common.ignored(murano_exceptions.HTTPInternalServerError):
+            cls.packages.append(cls.upload_telnet(cls.muranoclient))
 
     @classmethod
     def tearDownClass(cls):
@@ -109,8 +58,8 @@ class PolicyEnforcement(testtools.TestCase):
 
         rule_posts = [{"rule": rule} for rule in CONGRESS_RULES]
         for rule_post in rule_posts:
-            with ignored(keystone_exceptions.Conflict):
-                self.rules.append(self.congress_client.create_policy_rule(
+            with common.ignored(keystone_exceptions.Conflict):
+                self.rules.append(self.congressclient.create_policy_rule(
                     'murano_system',
                     rule_post))
 
@@ -118,10 +67,10 @@ class PolicyEnforcement(testtools.TestCase):
         super(PolicyEnforcement, self).tearDown()
 
         for rule in self.rules:
-            self.congress_client.delete_policy_rule(
+            self.congressclient.delete_policy_rule(
                 "murano_system", rule["id"])
         for env in self.environments:
-            with ignored(Exception):
+            with common.ignored(Exception):
                 self.muranoclient.environments.delete(env.id)
 
     def _wait_for_final_status(self, environment):
@@ -157,7 +106,7 @@ class PolicyEnforcement(testtools.TestCase):
             "instance": {
                 "flavor": flavor,
                 "keyname": key,
-                "image": CONF.murano.linux_image,
+                "image": common.CONF.murano.linux_image,
                 "assignFloatingIp": True,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
