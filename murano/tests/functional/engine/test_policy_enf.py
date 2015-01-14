@@ -38,18 +38,14 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
     @classmethod
     def setUpClass(cls):
         super(PolicyEnforcement, cls).setUpClass()
-
-        cls.congressclient = cls.congress_client()
-        cls.muranoclient = cls.murano_client()
-
         cls.packages = []
         with common.ignored(murano_exceptions.HTTPInternalServerError):
-            cls.packages.append(cls.upload_telnet(cls.muranoclient))
+            cls.packages.append(cls.upload_telnet(cls.murano_client()))
 
     @classmethod
     def tearDownClass(cls):
         for package in cls.packages:
-            cls.muranoclient.packages.delete(package.id)
+            cls.murano_client().packages.delete(package.id)
 
     def setUp(self):
         super(PolicyEnforcement, self).setUp()
@@ -59,7 +55,7 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
         rule_posts = [{"rule": rule} for rule in CONGRESS_RULES]
         for rule_post in rule_posts:
             with common.ignored(keystone_exceptions.Conflict):
-                self.rules.append(self.congressclient.create_policy_rule(
+                self.rules.append(self.congress_client().create_policy_rule(
                     'murano_system',
                     rule_post))
 
@@ -67,11 +63,11 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
         super(PolicyEnforcement, self).tearDown()
 
         for rule in self.rules:
-            self.congressclient.delete_policy_rule(
+            self.congress_client().delete_policy_rule(
                 "murano_system", rule["id"])
         for env in self.environments:
             with common.ignored(Exception):
-                self.muranoclient.environments.delete(env.id)
+                self.murano_client().environments.delete(env.id)
 
     def _wait_for_final_status(self, environment):
         start_time = time.time()
@@ -88,17 +84,17 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
         return status, ", ".join([r.text for r in reports])
 
     def _deploy_app(self, name, app):
-        environment = self.muranoclient.environments.create({'name': name})
+        environment = self.murano_client().environments.create({'name': name})
         self.environments.append(environment)
 
-        session = self.muranoclient.sessions.configure(environment.id)
+        session = self.murano_client().sessions.configure(environment.id)
 
-        self.muranoclient.services.post(environment.id,
+        self.murano_client().services.post(environment.id,
                                         path='/',
                                         data=app,
                                         session_id=session.id)
 
-        self.muranoclient.sessions.deploy(environment.id, session.id)
+        self.murano_client().sessions.deploy(environment.id, session.id)
         return environment
 
     def _create_env_body(self, flavor, key):

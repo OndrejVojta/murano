@@ -34,10 +34,26 @@ def ignored(*exceptions):
         pass
 
 
+class Memoize:
+
+    def __init__(self, f):
+        self.f = f
+        self.mem = {}
+
+    def __call__(self, *args, **kwargs):
+        if (args, str(kwargs)) in self.mem:
+            return self.mem[args, str(kwargs)]
+        else:
+            tmp = self.f(*args, **kwargs)
+            self.mem[args, str(kwargs)] = tmp
+            return tmp
+
+
 # TODO(FilipBlaha) refactor base.py to use this module
 class DeployTestMixin(object):
 
     @staticmethod
+    @Memoize
     def keystone_client():
         return ksclient.Client(username=CONF.murano.user,
                                password=CONF.murano.password,
@@ -45,6 +61,7 @@ class DeployTestMixin(object):
                                auth_url=CONF.murano.auth_url)
 
     @staticmethod
+    @Memoize
     def congress_client():
         auth = keystoneclient.auth.identity.v2.Password(
             auth_url=CONF.murano.auth_url,
@@ -56,6 +73,7 @@ class DeployTestMixin(object):
                               service_type='policy')
 
     @staticmethod
+    @Memoize
     def murano_client():
         keystone_client = DeployTestMixin.keystone_client()
         return mclient.Client('1',
@@ -63,6 +81,7 @@ class DeployTestMixin(object):
                               token=keystone_client.auth_token)
 
     @staticmethod
+    @Memoize
     def packages_path():
         return os.path.abspath(os.path.join(
             os.path.dirname(__file__),
