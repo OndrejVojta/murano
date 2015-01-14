@@ -90,14 +90,13 @@ class DeployTestMixin(object):
         ))
 
     @staticmethod
-    def upload_package(muranoclient, package_name, body, app):
+    def upload_package(package_name, body, app):
         files = {'%s' % package_name: open(app, 'rb')}
-        return muranoclient.packages.create(body, files)
+        return DeployTestMixin.murano_client().packages.create(body, files)
 
     @staticmethod
-    def upload_telnet(muranoclient):
+    def upload_telnet():
         return DeployTestMixin.upload_package(
-            muranoclient,
             'Telnet', {"categories": ["Web"], "tags": ["tag"]},
             os.path.join(DeployTestMixin.packages_path(),
                          'io.murano.apps.linux.Telnet.zip'))

@@ -40,7 +40,7 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
         super(PolicyEnforcement, cls).setUpClass()
         cls.packages = []
         with common.ignored(murano_exceptions.HTTPInternalServerError):
-            cls.packages.append(cls.upload_telnet(cls.murano_client()))
+            cls.packages.append(cls.upload_telnet())
 
     @classmethod
     def tearDownClass(cls):
