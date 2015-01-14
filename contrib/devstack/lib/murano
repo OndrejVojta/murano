@@ -178,7 +178,7 @@ function configure_murano {
     iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
 
     # configure model policy enforcement
-    iniset $MURANO_CONF_FILE murano enable_model_policy_enforcer $MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT
+    iniset $MURANO_CONF_FILE engine enable_model_policy_enforcer $MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT
 }
 
 
