@@ -160,6 +160,14 @@ class TestCongressRules(unittest.TestCase):
         self.assertTrue('murano:object+("2", "1", "t2")' in rules_str)
         self.assertTrue('murano:object+("3", "1", "t3")' in rules_str)
 
+    def test_tenant_id(self):
+        model = self._load_file("model.yaml")
+        congress_rules = congress.CongressRules()
+        rules = congress_rules.convert(model, tenant_id='tenant1')
+        rules_str = ", \n".join(map(str, rules))
+        self.assertTrue('murano:property+("c86104748a0c4907b4c5981e6d3bce9f", '
+                        '"tenant_id", "tenant1")' in rules_str)
+
     def test_wordpress(self):
         class_loader = MockClassLoader([
             'io.murano.Environment->io.murano.Object',
