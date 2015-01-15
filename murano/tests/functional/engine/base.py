@@ -55,7 +55,6 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             except Exception:
                 pass
 
-
     def wait_for_environment_deploy(self, environment):
         start_time = time.time()
 

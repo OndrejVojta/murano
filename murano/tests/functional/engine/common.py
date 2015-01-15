@@ -15,8 +15,8 @@
 import congressclient.v1.client as cclient
 import contextlib
 import keystoneclient
-import muranoclient.common.exceptions as exceptions
 import murano.tests.functional.engine.config as cfg
+import muranoclient.common.exceptions as exceptions
 import os
 import time
 
@@ -36,8 +36,10 @@ def ignored(*exceptions):
     except exceptions:
         pass
 
+
 def memoize(f):
     cache = {}
+
     def decorated_function(*args):
         if args in cache:
             return cache[args]
@@ -121,13 +123,6 @@ class DeployTestMixin(object):
                          'io.murano.apps.linux.Telnet.zip'))
 
     @classmethod
-    def upload_telnet(cls):
-        return cls.upload_package(
-            'Telnet', {"categories": ["Web"], "tags": ["tag"]},
-            os.path.join(DeployTestMixin.packages_path(),
-                         'io.murano.apps.linux.Telnet.zip'))
-
-    @classmethod
     def upload_postgres(cls):
         return cls.upload_package(
             'PostgreSQL',
@@ -151,7 +146,6 @@ class DeployTestMixin(object):
             os.path.join(DeployTestMixin.packages_path(),
                          'io.murano.apps.apache.ApacheHttpServer.zip'))
 
-
     @classmethod
     def upload_tomcat(cls):
         return DeployTestMixin.upload_package(
@@ -159,7 +153,6 @@ class DeployTestMixin(object):
             {"categories": ["Application Servers"], "tags": ["tag"]},
             os.path.join(cls.packages_path(),
                          'io.murano.apps.apache.Tomcat.zip'))
-
 
     def environment_delete(self, environment_id, timeout=180):
         self.murano_client().environments.delete(environment_id)
@@ -173,4 +166,3 @@ class DeployTestMixin(object):
         raise Exception(
             'Environment {0} was not deleted in {1} seconds'.format(
                 environment_id, timeout))
-
