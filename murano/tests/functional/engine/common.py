@@ -103,7 +103,7 @@ class DeployTestMixin(object):
     @classmethod
     def upload_package(cls, package_name, body, app):
         files = {'%s' % package_name: open(app, 'rb')}
-        package = DeployTestMixin.murano_client().packages.create(body, files)
+        package = cls.murano_client().packages.create(body, files)
         if not hasattr(cls, '_packages'):
             cls._packages = []
         cls._packages.append(package)
@@ -119,7 +119,7 @@ class DeployTestMixin(object):
     def upload_telnet(cls):
         return cls.upload_package(
             'Telnet', {"categories": ["Web"], "tags": ["tag"]},
-            os.path.join(DeployTestMixin.packages_path(),
+            os.path.join(cls.packages_path(),
                          'io.murano.apps.linux.Telnet.zip'))
 
     @classmethod
@@ -127,7 +127,7 @@ class DeployTestMixin(object):
         return cls.upload_package(
             'PostgreSQL',
             {"categories": ["Databases"], "tags": ["tag"]},
-            os.path.join(DeployTestMixin.packages_path(),
+            os.path.join(cls.packages_path(),
                          'io.murano.databases.PostgreSql.zip'))
 
     @classmethod
@@ -135,7 +135,7 @@ class DeployTestMixin(object):
         return cls.upload_package(
             'SqlDatabase',
             {"categories": ["Databases"], "tags": ["tag"]},
-            os.path.join(DeployTestMixin.packages_path(),
+            os.path.join(cls.packages_path(),
                          'io.murano.databases.SqlDatabase.zip'))
 
     @classmethod
@@ -143,12 +143,12 @@ class DeployTestMixin(object):
         return cls.upload_package(
             'Apache',
             {"categories": ["Application Servers"], "tags": ["tag"]},
-            os.path.join(DeployTestMixin.packages_path(),
+            os.path.join(cls.packages_path(),
                          'io.murano.apps.apache.ApacheHttpServer.zip'))
 
     @classmethod
     def upload_tomcat(cls):
-        return DeployTestMixin.upload_package(
+        return cls.upload_package(
             'Tomcat',
             {"categories": ["Application Servers"], "tags": ["tag"]},
             os.path.join(cls.packages_path(),
