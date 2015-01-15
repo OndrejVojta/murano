@@ -26,7 +26,7 @@ class CongressRules(object):
     _env_id = ''
     _class_loader = None
 
-    def convert(self, model, class_loader=None):
+    def convert(self, model, class_loader=None, tenant_id=None):
         self._rules = []
         self._class_loader = class_loader
 
@@ -34,6 +34,12 @@ class CongressRules(object):
             return self._rules
 
         self._env_id = model['?']['id']
+
+        # arbitrary property for tenant_id
+        if tenant_id is not None:
+            r = MuranoProperty(self._env_id, 'tenant_id', tenant_id)
+            self._rules.append(r)
+
         self._walk(model, self._process_item)
 
         # convert MuranoProperty containing reference to another object
