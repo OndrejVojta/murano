@@ -166,3 +166,16 @@ class DeployTestMixin(object):
         raise Exception(
             'Environment {0} was not deleted in {1} seconds'.format(
                 environment_id, timeout))
+
+    def _deploy_apps(self, name, *apps):
+        environment = self.murano_client().environments.create({'name': name})
+        self.environments.append(environment.id)
+        session = self.murano_client().sessions.configure(environment.id)
+        for app in apps:
+            self.murano_client().services.post(
+                environment.id,
+                path='/',
+                data=app,
+                session_id=session.id)
+        self.murano_client().sessions.deploy(environment.id, session.id)
+        return environment

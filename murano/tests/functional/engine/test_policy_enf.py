@@ -81,20 +81,6 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
 
         return status, ", ".join([r.text for r in reports])
 
-    def _deploy_app(self, name, app):
-        environment = self.murano_client().environments.create({'name': name})
-        self.environments.append(environment)
-
-        session = self.murano_client().sessions.configure(environment.id)
-
-        self.murano_client().services.post(environment.id,
-                                        path='/',
-                                        data=app,
-                                        session_id=session.id)
-
-        self.murano_client().sessions.deploy(environment.id, session.id)
-        return environment
-
     def _create_env_body(self, flavor, key):
         return {
             "instance": {
@@ -117,7 +103,7 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
 
     def _check_deploy_failure(self, post_body):
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
-        env = self._deploy_app(environment_name, post_body)
+        env = self._deploy_apps(environment_name, post_body)
         status = self._wait_for_final_status(env)
         self.assertIn("failure", status[0], "Unexpected status : " + status[0])
         self.assertIn("model validation", status[1].lower(),

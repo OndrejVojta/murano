@@ -215,19 +215,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         }
 
     def _quick_deploy(self, name, *apps):
-        environment = self.muranoclient.environments.create({'name': name})
-        self.environments.append(environment.id)
-
-        session = self.muranoclient.sessions.configure(environment.id)
-
-        for app in apps:
-            self.muranoclient.services.post(environment.id,
-                                            path='/',
-                                            data=app,
-                                            session_id=session.id)
-
-        self.muranoclient.sessions.deploy(environment.id, session.id)
-
+        environment = self._deploy_apps(name, *apps)
         return self.wait_for_environment_deploy(environment)
 
     def _get_stack(self, environment_id):
