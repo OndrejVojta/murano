@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import os
+import common
 import socket
 import time
 import uuid
@@ -20,85 +20,26 @@ import uuid
 import testresources
 import testtools
 
-from heatclient import client as heatclient
-from keystoneclient.v2_0 import client as ksclient
-from muranoclient import client as mclient
-import muranoclient.common.exceptions as exceptions
-
-import murano.tests.functional.engine.config as cfg
-
-
-CONF = cfg.cfg.CONF
-
 
 class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
-                 testresources.ResourcedTestCase):
+                 testresources.ResourcedTestCase, common.DeployTestMixin):
 
     @classmethod
     def setUpClass(cls):
         super(MuranoBase, cls).setUpClass()
 
-        cfg.load_config()
+        cls.muranoclient = cls.murano_client()
+        cls.linux = common.CONF.murano.linux_image
 
-        keystone_client = ksclient.Client(username=CONF.murano.user,
-                                          password=CONF.murano.password,
-                                          tenant_name=CONF.murano.tenant,
-                                          auth_url=CONF.murano.auth_url)
+        cls.upload_telnet()
+        cls.upload_apache()
+        cls.upload_tomcat()
+        cls.upload_postgres()
+        cls.upload_sql_db()
 
-        heat_url = keystone_client.service_catalog.url_for(
-            service_type='orchestration', endpoint_type='publicURL')
-
-        cls.heat_client = heatclient.Client('1', endpoint=heat_url,
-                                            token=keystone_client.auth_token)
-
-        url = CONF.murano.murano_url
-        murano_url = url if 'v1' not in url else "/".join(
-            url.split('/')[:url.split('/').index('v1')])
-
-        cls.muranoclient = mclient.Client('1',
-                                          endpoint=murano_url,
-                                          token=keystone_client.auth_token)
-
-        cls.linux = CONF.murano.linux_image
-
-        cls.pkgs_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__),
-            os.path.pardir,
-            'murano-app-incubator'
-        ))
-
-        def upload_package(package_name, body, app):
-
-            files = {'%s' % package_name: open(app, 'rb')}
-
-            return cls.muranoclient.packages.create(body, files)
-
-        upload_package(
-            'PostgreSQL',
-            {"categories": ["Databases"], "tags": ["tag"]},
-            os.path.join(cls.pkgs_path, 'io.murano.databases.PostgreSql.zip')
-        )
-        upload_package(
-            'SqlDatabase',
-            {"categories": ["Databases"], "tags": ["tag"]},
-            os.path.join(cls.pkgs_path, 'io.murano.databases.SqlDatabase.zip')
-        )
-        upload_package(
-            'Apache',
-            {"categories": ["Application Servers"], "tags": ["tag"]},
-            os.path.join(cls.pkgs_path,
-                         'io.murano.apps.apache.ApacheHttpServer.zip')
-        )
-        upload_package(
-            'Tomcat',
-            {"categories": ["Application Servers"], "tags": ["tag"]},
-            os.path.join(cls.pkgs_path, 'io.murano.apps.apache.Tomcat.zip')
-        )
-        upload_package(
-            'Telnet',
-            {"categories": ["Web"], "tags": ["tag"]},
-            os.path.join(cls.pkgs_path, 'io.murano.apps.linux.Telnet.zip')
-        )
+    @classmethod
+    def tearDownClass(cls):
+        cls.purge_uploaded_packages()
 
     def setUp(self):
         super(MuranoBase, self).setUp()
@@ -114,18 +55,6 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             except Exception:
                 pass
 
-    def environment_delete(self, environment_id, timeout=180):
-        self.muranoclient.environments.delete(environment_id)
-
-        start_time = time.time()
-        while time.time() - start_time < timeout:
-            try:
-                self.muranoclient.environments.get(environment_id)
-            except exceptions.HTTPNotFound:
-                return
-        raise Exception(
-            'Environment {0} was not deleted in {1} seconds'.format(
-                environment_id, timeout))
 
     def wait_for_environment_deploy(self, environment):
         start_time = time.time()
@@ -304,7 +233,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
 
     def _get_stack(self, environment_id):
 
-        for stack in self.heat_client.stacks.list():
+        for stack in self.heat_client().stacks.list():
             if environment_id in stack.description:
                 return stack
 
@@ -331,7 +260,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.wait_for_environment_deploy(environment)
 
         stack_name = self._get_stack(environment.id).stack_name
-        template = self.heat_client.stacks.template(stack_name)
+        template = self.heat_client().stacks.template(stack_name)
         ip_addresses = '{0}-assigned-ip'.format(instance_name)
         floating_ip = '{0}-FloatingIPaddress'.format(instance_name)
 

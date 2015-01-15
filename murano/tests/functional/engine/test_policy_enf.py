@@ -38,14 +38,12 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
     @classmethod
     def setUpClass(cls):
         super(PolicyEnforcement, cls).setUpClass()
-        cls.packages = []
         with common.ignored(murano_exceptions.HTTPInternalServerError):
-            cls.packages.append(cls.upload_telnet())
+            cls.upload_telnet()
 
     @classmethod
     def tearDownClass(cls):
-        for package in cls.packages:
-            cls.murano_client().packages.delete(package.id)
+        cls.purge_uploaded_packages()
 
     def setUp(self):
         super(PolicyEnforcement, self).setUp()
@@ -67,7 +65,7 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
                 "murano_system", rule["id"])
         for env in self.environments:
             with common.ignored(Exception):
-                self.murano_client().environments.delete(env.id)
+                self.environment_delete(env.id)
 
     def _wait_for_final_status(self, environment):
         start_time = time.time()
