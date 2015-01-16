@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import congress_rules
+from murano.policy_enf import congress_rules
 
 from murano.openstack.common import log as logging
 
