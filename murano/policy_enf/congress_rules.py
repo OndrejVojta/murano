@@ -19,7 +19,7 @@ class CongressRules(object):
         - murano:object+(env_id, obj_id, type_name)
         - murano:property+(obj_id, prop_name, prop_value)
         - murano:relationship+(source, target, name)
-        - murano:parent-type+(obj_id, parent_name)
+        - murano:parent_type+(obj_id, parent_name)
     """
 
     _rules = []
@@ -135,6 +135,7 @@ class CongressRules(object):
 
     def _get_parent_types(self, type_name, class_loader):
         types = set()
+        types.add(type_name)
         if class_loader is not None:
             cls = class_loader.get_class(type_name)
             if cls is not None:
@@ -191,5 +192,5 @@ class MuranoParentType(object):
         self.type_name = type_name
 
     def __str__(self):
-        return 'murano:parent-type+("{0}", "{1}")' \
+        return 'murano:parent_type+("{0}", "{1}")' \
             .format(self.obj_id, self.type_name)

@@ -117,16 +117,20 @@ class TestCongressRules(unittest.TestCase):
         rules_str = self._create_rules_str('model.yaml', class_loader)
 
         self.assertTrue(
-            'murano:parent-type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "parent1")' in rules_str)
 
         self.assertTrue(
-            'murano:parent-type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "parent2")' in rules_str)
 
         self.assertTrue(
-            'murano:parent-type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "grand-parent")' in rules_str)
+
+        self.assertTrue(
+            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            ' "io.murano.apps.linux.Git")' in rules_str)
 
     def test_to_dictionary(self):
         """If model contains object entry (not dict)
