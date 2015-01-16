@@ -81,6 +81,8 @@ class ModelPolicyEnforcer(object):
         validation_result = client.execute_policy_action(
             "murano_system",
             "simulate",
+            False,
+            False,
             {'query': 'predeploy_error(x)', 'action_policy': 'action',
             'sequence': rules_str})
 
