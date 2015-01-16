@@ -74,7 +74,6 @@ class TestCongressRules(unittest.TestCase):
     def test_convert_simple_app(self):
         rules_str = self._create_and_check_rules_str('model')
 
-        self.assertFalse("\"instance\"" in rules_str)
         self.assertFalse("instance." in rules_str)
 
     def test_convert_model_two_instances(self):
@@ -92,6 +91,10 @@ class TestCongressRules(unittest.TestCase):
         self.assertTrue(
             'murano:relationship+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
             '"8ce94f23-f16a-40a1-9d9d-a877266c315d", "server")' in rules_str)
+
+        self.assertTrue(
+            'murano:relationship+("0aafd67e-72e9-4ae0-bb62-fe724f77df2a", '
+            '"ed8df2b0-ddd2-4009-b3c9-2e7a368f3cb8", "instance")' in rules_str)
 
     def test_convert_model_complex(self):
         self._create_and_check_rules_str('model_complex')

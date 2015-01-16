@@ -13,13 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import congressclient
-
 import mock
 
-import murano.common.config as config
-import murano.common.engine as engine
+from murano.common import config
+from murano.common import engine
 from murano.engine import client_manager
-import murano.policy_enf.model_policy_enforcer as model_policy_enforcer
+from murano.policy_enf import model_policy_enforcer
 from murano.tests.unit import base
 
 
@@ -86,3 +85,31 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
         self.assertRaises(model_policy_enforcer.ValidationError,
                           enforcer.validate, model)
+
+    def test_parse_result(self):
+        congress_response = [
+            "",
+            "unexpected response",
+
+            "predeploy_error(\"env1\","
+            "\"instance1\","
+            "\"Instance '{1}' in env '{0}' has problem\")",
+
+            "predeploy_error(\"env1\","
+            " \"instance2\","
+            " \"Instance '{1}' in env '{0}' has problem\")",
+
+            "predeploy_error(\"env1\","
+            " \"instance2\","
+            " \"Some problem\")"]
+
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
+        result = enforcer._result_to_str(congress_response)
+        print result
+
+        self.assertTrue("unexpected response" in result)
+        self.assertTrue("Instance 'instance1' in env 'env1' has problem"
+                        in result)
+        self.assertTrue("Instance 'instance2' in env 'env1' has problem"
+                        in result)
+        self.assertTrue("Some problem" in result)
