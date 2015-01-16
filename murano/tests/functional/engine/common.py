@@ -101,19 +101,17 @@ class DeployTestMixin(object):
         ))
 
     @classmethod
+    def init_list(cls, list_name):
+        if not hasattr(cls, list_name):
+            setattr(cls, list_name, [])
+
+    @classmethod
     def upload_package(cls, package_name, body, app):
         files = {'%s' % package_name: open(app, 'rb')}
         package = cls.murano_client().packages.create(body, files)
-        if not hasattr(cls, '_packages'):
-            cls._packages = []
+        cls.init_list("_packages")
         cls._packages.append(package)
         return package
-
-    @classmethod
-    def purge_uploaded_packages(cls):
-        if hasattr(cls, '_packages'):
-            for pckg in cls._packages:
-                cls.murano_client().packages.delete(pckg.id)
 
     @classmethod
     def upload_telnet(cls):
@@ -167,9 +165,10 @@ class DeployTestMixin(object):
             'Environment {0} was not deleted in {1} seconds'.format(
                 environment_id, timeout))
 
-    def _deploy_apps(self, name, *apps):
+    def deploy_apps(self, name, *apps):
         environment = self.murano_client().environments.create({'name': name})
-        self.environments.append(environment.id)
+        self.init_list("_environments")
+        self._environments.append(environment.id)
         session = self.murano_client().sessions.configure(environment.id)
         for app in apps:
             self.murano_client().services.post(
@@ -179,3 +178,23 @@ class DeployTestMixin(object):
                 session_id=session.id)
         self.murano_client().sessions.deploy(environment.id, session.id)
         return environment
+
+    @classmethod
+    def purge_environments(cls):
+        cls.init_list("_environments")
+        try:
+            for env in cls._environments:
+                with ignored(Exception):
+                    cls.environment_delete(env.id)
+        finally:
+            cls._environments = []
+
+    @classmethod
+    def purge_uploaded_packages(cls):
+        cls.init_list("_packages")
+        try:
+            for pkg in cls._packages:
+                with ignored(Exception):
+                    cls.murano_client().packages.delete(pkg.id)
+        finally:
+            cls._packages = []

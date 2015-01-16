@@ -48,7 +48,6 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
     def setUp(self):
         super(PolicyEnforcement, self).setUp()
         self.rules = []
-        self.environments = []
 
         rule_posts = [{"rule": rule} for rule in CONGRESS_RULES]
         for rule_post in rule_posts:
@@ -59,13 +58,11 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
 
     def tearDown(self):
         super(PolicyEnforcement, self).tearDown()
+        self.purge_environments()
 
         for rule in self.rules:
             self.congress_client().delete_policy_rule(
                 "murano_system", rule["id"])
-        for env in self.environments:
-            with common.ignored(Exception):
-                self.environment_delete(env.id)
 
     def _wait_for_final_status(self, environment):
         start_time = time.time()
@@ -103,7 +100,7 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
 
     def _check_deploy_failure(self, post_body):
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
-        env = self._deploy_apps(environment_name, post_body)
+        env = self.deploy_apps(environment_name, post_body)
         status = self._wait_for_final_status(env)
         self.assertIn("failure", status[0], "Unexpected status : " + status[0])
         self.assertIn("model validation", status[1].lower(),

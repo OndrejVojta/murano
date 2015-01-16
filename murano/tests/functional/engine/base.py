@@ -44,16 +44,9 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
     def setUp(self):
         super(MuranoBase, self).setUp()
 
-        self.environments = []
-
     def tearDown(self):
         super(MuranoBase, self).tearDown()
-
-        for env in self.environments:
-            try:
-                self.environment_delete(env)
-            except Exception:
-                pass
+        self.purge_environments()
 
     def wait_for_environment_deploy(self, environment):
         start_time = time.time()
@@ -215,7 +208,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         }
 
     def _quick_deploy(self, name, *apps):
-        environment = self._deploy_apps(name, *apps)
+        environment = self.deploy_apps(name, *apps)
         return self.wait_for_environment_deploy(environment)
 
     def _get_stack(self, environment_id):
