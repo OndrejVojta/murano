@@ -135,6 +135,7 @@ class CongressRules(object):
 
     def _get_parent_types(self, type_name, class_loader):
         types = set()
+        types.add(type_name)
         if class_loader is not None:
             cls = class_loader.get_class(type_name)
             if cls is not None:
