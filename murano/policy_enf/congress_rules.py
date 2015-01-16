@@ -94,6 +94,8 @@ class CongressRules(object):
 
         # skip when inside properties of other object
         if '?' in obj and prefix != "":
+            rules.append(MuranoRelationship(obj_id, obj['?']['id'],
+                                            prefix.split('.')[0]))
             return rules
 
         for key, value in obj.iteritems():
