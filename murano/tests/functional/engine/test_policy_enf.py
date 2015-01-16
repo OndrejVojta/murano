@@ -21,8 +21,6 @@ import time
 import uuid
 
 
-#TODO(ovo) create policy 'murano' and 'murano_system'
-
 CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
                   'predeploy_error(obj_id) :- '
                   'murano:property(obj_id, "flavor", prop_value), '
@@ -36,8 +34,22 @@ CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
 class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
 
     @classmethod
+    def create_policy_req(cls, policy_name):
+        return {'abbreviation': None, 'kind': None,
+                'name': policy_name,
+                'description': None}
+
+    @classmethod
     def setUpClass(cls):
         super(PolicyEnforcement, cls).setUpClass()
+
+        with common.ignored(Exception):
+            cls.congress_client().create_policy(
+                cls.create_policy_req('murano_system'))
+        with common.ignored(Exception):
+            cls.congress_client().create_policy(
+                cls.create_policy_req('murano'))
+
         with common.ignored(murano_exceptions.HTTPInternalServerError):
             cls.upload_telnet()
 
