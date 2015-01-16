@@ -152,31 +152,33 @@ class DeployTestMixin(object):
             os.path.join(cls.packages_path(),
                          'io.murano.apps.apache.Tomcat.zip'))
 
-    def environment_delete(self, environment_id, timeout=180):
-        self.murano_client().environments.delete(environment_id)
+    @classmethod
+    def environment_delete(cls, environment_id, timeout=180):
+        cls.murano_client().environments.delete(environment_id)
 
         start_time = time.time()
         while time.time() - start_time < timeout:
             try:
-                self.murano_client().environments.get(environment_id)
+                cls.murano_client().environments.get(environment_id)
             except exceptions.HTTPNotFound:
                 return
         raise Exception(
             'Environment {0} was not deleted in {1} seconds'.format(
                 environment_id, timeout))
 
-    def deploy_apps(self, name, *apps):
-        environment = self.murano_client().environments.create({'name': name})
-        self.init_list("_environments")
-        self._environments.append(environment.id)
-        session = self.murano_client().sessions.configure(environment.id)
+    @classmethod
+    def deploy_apps(cls, name, *apps):
+        environment = cls.murano_client().environments.create({'name': name})
+        cls.init_list("_environments")
+        cls._environments.append(environment)
+        session = cls.murano_client().sessions.configure(environment.id)
         for app in apps:
-            self.murano_client().services.post(
+            cls.murano_client().services.post(
                 environment.id,
                 path='/',
                 data=app,
                 session_id=session.id)
-        self.murano_client().sessions.deploy(environment.id, session.id)
+        cls.murano_client().sessions.deploy(environment.id, session.id)
         return environment
 
     @classmethod
