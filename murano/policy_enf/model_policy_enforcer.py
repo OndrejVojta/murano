@@ -14,6 +14,7 @@
 #    under the License.
 
 from murano.policy_enf import congress_rules
+import re
 
 from murano.openstack.common import log as logging
 
@@ -83,10 +84,24 @@ class ModelPolicyEnforcer(object):
             "simulate",
             False,
             False,
-            {'query': 'predeploy_error(x)', 'action_policy': 'action',
+            {'query': 'predeploy_error(eid, oid, msg)',
+             'action_policy': 'action',
             'sequence': rules_str})
 
         if validation_result["result"]:
-            raise ValidationError("Model validation failed!")
+            result_str = self._result_to_str(validation_result["result"])
+            raise ValidationError("Model validation failed:" + result_str)
         else:
             LOG.info('Model valid')
+
+    def _result_to_str(self, results):
+        s = ''
+        regexp = 'predeploy_error\("([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\)'
+        for result in results:
+            s += '\n  '
+            match = re.search(regexp, result)
+            if match:
+                s += match.group(3).format(match.group(1), match.group(2))
+            else:
+                s += result
+        return s
