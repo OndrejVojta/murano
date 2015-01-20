@@ -13,12 +13,13 @@
 # under the License.
 
 import common
-import keystoneclient.openstack.common.apiclient.exceptions \
-    as keystone_exceptions
-import muranoclient.common.exceptions as murano_exceptions
 import testtools
 import time
 import uuid
+
+import keystoneclient.openstack.common.apiclient.exceptions \
+    as keystone_exceptions
+import muranoclient.common.exceptions as murano_exceptions
 
 
 CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
