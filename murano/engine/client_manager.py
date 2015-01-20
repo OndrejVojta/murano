@@ -14,6 +14,7 @@
 
 from eventlet import semaphore
 import heatclient.client as hclient
+
 import keystoneclient
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
@@ -26,9 +27,13 @@ from murano.engine import environment
 
 try:
     # integration with congress is optional
-    import congressclient.v1.client as cclient
-except ImportError as import_error:
-    congress_client_import_error = import_error
+    import congressclient.v1.client as congress_client
+except ImportError as congress_client_import_error:
+    congress_client = None
+try:
+    import mistralclient.api.client as mistralclient
+except ImportError as mistral_import_error:
+    mistralclient = None
 
 
 class ClientManager(object):
@@ -79,11 +84,16 @@ class ClientManager(object):
         return self._get_client(context, 'keystone', use_trusts, factory)
 
     def get_congress_client(self, context, use_trusts=True):
-        try:
+        """Client for congress services
+
+        :return: initialized congress client
+        :raise ImportError: in case that python-congressclient
+        is not present on python path
+        """
+
+        if not congress_client:
+            # congress client was not imported
             raise congress_client_import_error
-        except NameError:
-            # congress client was successfully imported
-            pass
         if not config.CONF.engine.use_trusts:
             use_trusts = False
 
@@ -93,7 +103,8 @@ class ClientManager(object):
                 tenant_name=keystone_client.tenant_name,
                 token=auth_token)
             session = keystoneclient.session.Session(auth=auth)
-            return cclient.Client(session=session, service_type='policy')
+            return congress_client.Client(session=session,
+                                          service_type='policy')
 
         return self._get_client(context, 'congress', use_trusts, factory)
 
@@ -166,3 +177,30 @@ class ClientManager(object):
                 token=auth_token)
 
         return self._get_client(context, 'murano', use_trusts, factory)
+
+    def get_mistral_client(self, context, use_trusts=True):
+        if not mistralclient:
+            raise mistral_import_error
+
+        if not config.CONF.engine.use_trusts:
+            use_trusts = False
+
+        def factory(keystone_client, auth_token):
+            mistral_settings = config.CONF.mistral
+
+            endpoint_type = mistral_settings.endpoint_type
+            service_type = mistral_settings.service_type
+
+            mistral_url = keystone_client.service_catalog.url_for(
+                service_type=service_type,
+                endpoint_type=endpoint_type)
+
+            return mistralclient.client(mistral_url=mistral_url,
+                                        auth_url=keystone_client.auth_url,
+                                        project_id=keystone_client.tenant_id,
+                                        endpoint_type=endpoint_type,
+                                        service_type=service_type,
+                                        auth_token=auth_token,
+                                        user_id=keystone_client.user_id)
+
+        return self._get_client(context, 'mistral', use_trusts, factory)
