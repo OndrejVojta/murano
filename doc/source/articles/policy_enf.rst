@@ -11,21 +11,27 @@ Murano Policy Enforcement Example
 3. Create **flavor_ram** rule
     .. code-block:: console
 
-        $(openstack) congress policy rule create murano_system "flavor_ram(flavor_name, ram) :- nova:flavors(id, flavor_name, cpus, ram)"
+        congress policy rule create murano_system /
+        > "flavor_ram(flavor_name, ram) :- nova:flavors(id, flavor_name, cpus, ram)"
     ..
 
 4. Create **predeploy_error** rule
 
     .. code-block:: console
 
-        $(openstack) congress policy rule create murano_system "predeploy_error(eid, obj_id, msg) :- murano:object(obj_id, eid, type), murano:property(obj_id, \"flavor\", flavor_name), flavor_ram(flavor_name, ram), gt(ram, 2048), murano:property(obj_id, \"name\", obj_name), concat(obj_name, \": instance flavor has RAM size over 2048MB\", msg)"
+        congress policy rule create murano_system /
+        > "predeploy_error(eid, obj_id, msg) :- murano:object(obj_id, eid, type),/
+        > murano:property(obj_id, \"flavor\", flavor_name), /
+        > flavor_ram(flavor_name, ram), gt(ram, 2048), /
+        > murano:property(obj_id, \"name\", obj_name), /
+        > concat(obj_name, \": instance flavor has RAM size over 2048MB\", msg)"
     ..
 
 5. Create environment with simple application
-    - Git picture
-
-6. Deploy environment with "m1.medium" flavor
+    - Choose with **"m1.medium"** instance flavor
     - instance creation picture
+
+6. Deploy environment
 
     .. code-block:: console
 
