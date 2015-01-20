@@ -7,22 +7,22 @@ Introduction
 As a part of policy guided fulfillment we need to enforce policies on Murano environment deployment.
 If enforcement fails, then deployment fails. Policies are defined and evaluated in Congress project.
 The policy language for Congress is Datalog. Congress policy consists of Datalog rules and facts.
-Cloud administrator defines policies in Congress.  Examples of policies:
+Cloud administrator defines policies in Congress. Examples of such policies:
 
 * all VM instances must have at least 2GB of RAM
-* all Apache server instances must have version given certified version
+* all Apache server instances must have given certified version
 * data placement policy: all DB instances must deployed at given geo location (enforcing some law restriction on data placement)
 
-These policies are evaluated over data if form of tables (Congress data structures). A deployed Murano environment must be
+These policies are evaluated over data in form of tables (Congress data structures). A deployed Murano environment must be
 decomposed to Congress data structures. The decomposed environment is sent to congress for simulation. Congress simulates
-whether resulting state after deployment of such environment does not violate some defined policy. Deployment is aborted
+whether resulting state after deployment of such environment does not violate any defined policy. Deployment is aborted
 in case of policy violation. Murano uses 2 predefined policies in Congress:
 
 * *murano_system* contains rules and facts of policies defined by cloud admin.
-* *murano* contains only facts reflecting resulting state after deployment of given environment.
+* *murano* contains only facts/records reflecting resulting state after deployment of an environment.
 
-Facts in *murano* policy are queried by rules from *murano_system* policy. Congress Simulation does not create
-facts in *murano* policy only provides answer whether resulting state violates some policy without creating any records.
+Records in *murano* policy are queried by rules from *murano_system* policy. Congress simulation does not create any
+records in *murano* policy simulation only gives us answer whether resulting state violates some policy.
 
 
 Example
