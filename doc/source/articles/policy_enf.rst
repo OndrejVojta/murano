@@ -3,6 +3,7 @@ Murano Policy Enforcement Example
 =================================
 
 1. Enable policy enforcement in murano
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     - edit */etc/murano/murano.conf*:
 
     .. code-block:: ini
@@ -15,6 +16,7 @@ Murano Policy Enforcement Example
     - restart murano
 
 2. Create **murano** and **murano_system** policy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     - Check if policies **murano** and **murano_system** were created by datasource driver:
         ``congress policy list``
     - If there is no **murano** and **murano_system** then create them by these commands:
@@ -26,6 +28,7 @@ Murano Policy Enforcement Example
     ..
 
 3. Create **flavor_ram** rule
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     We create the rule that resolves parameters of flavor by flavor name and returns *ram* parameter. It uses rule *flavors* from *nova* policy.
 
     Use this command to create the rule:
@@ -36,6 +39,7 @@ Murano Policy Enforcement Example
     ..
 
 4. Create **predeploy_error** rule
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Then we create this rule which references **flavor_ram** rule we created before. It disables flavors with ram higher than 2048 MB and constructs message returned to the user in *msg* variable.
 
@@ -58,6 +62,7 @@ Murano Policy Enforcement Example
     ..
 
 5. Create environment with simple application
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     - Choose Git application from murano applications
     - Create with **"m1.medium"** instance flavor
 
@@ -65,11 +70,8 @@ Murano Policy Enforcement Example
 
 
 6. Deploy environment
-    - environment is in Status: Deploy FAILURE
+^^^^^^^^^^^^^^^^^^^^^
+    - environment is in Status: **Deploy FAILURE**
     - Check deployment log:
 
-    .. code-block:: console
-
-        2015-01-20 04:24:15 - Model validation failed:
-          ftceni54s1ywb1: instance flavor has RAM size over 2048MB
-    ..
+    .. image:: deployment-log.png
