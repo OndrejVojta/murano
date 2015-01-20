@@ -9,22 +9,35 @@ Murano Policy Enforcement Example
     - if not done by datasource driver
 
 3. Create **flavor_ram** rule
+    We create the rule that resolves parameters of flavor by flavor name and returns *ram* parameter. It uses rule *flavors* from *nova* policy.
+
+    Use this command to create the rule:
+
     .. code-block:: console
 
-        congress policy rule create murano_system /
-        > "flavor_ram(flavor_name, ram) :- nova:flavors(id, flavor_name, cpus, ram)"
+        congress policy rule create murano_system "flavor_ram(flavor_name, ram) :- nova:flavors(id, flavor_name, cpus, ram)"
     ..
 
 4. Create **predeploy_error** rule
 
+    Then we create this rule which references **flavor_ram** rule we created before:
+
     .. code-block:: console
 
-        congress policy rule create murano_system /
-        > "predeploy_error(eid, obj_id, msg) :- murano:object(obj_id, eid, type),/
-        > murano:property(obj_id, \"flavor\", flavor_name), /
-        > flavor_ram(flavor_name, ram), gt(ram, 2048), /
-        > murano:property(obj_id, \"name\", obj_name), /
-        > concat(obj_name, \": instance flavor has RAM size over 2048MB\", msg)"
+        predeploy_error(eid, obj_id, msg) :-
+           murano:object(obj_id, eid, type),
+           murano:property(obj_id, "flavor", flavor_name),
+           flavor_ram(flavor_name, ram),
+           gt(ram, 2048),
+           murano:property(obj_id, "name", obj_name),
+           concat(obj_name, ": instance flavor has RAM size over 2048MB", msg)
+    ..
+
+    Use this command to create the rule:
+
+    .. code-block:: console
+
+      (openstack) congress policy rule create murano_system "predeploy_error(eid, obj_id, msg) :- murano:object(obj_id, eid, type), murano:property(obj_id, \"flavor\", flavor_name), flavor_ram(flavor_name, ram), gt(ram, 2048), murano:property(obj_id, \"name\", obj_name), concat(obj_name, \": instance flavor has RAM size over 2048MB\", msg)"
     ..
 
 5. Create environment with simple application
@@ -32,6 +45,8 @@ Murano Policy Enforcement Example
     - instance creation picture
 
 6. Deploy environment
+    - environment is in Status: Deploy FAILURE
+    - Check deployment log:
 
     .. code-block:: console
 
