@@ -65,6 +65,7 @@ Transformed to these rules:
 If model contains list of values it is represented as set of multiple rules:
 
     .. code-block:: yaml
+
         instances:
         - '?': {id: be3c5155-6670-4cf6-9a28-a4574ff70b71, type: io.murano.resources.LinuxMuranoInstance}
         networks:
@@ -85,6 +86,7 @@ There is one special property on environment for tenant_id:
 Murano app models can contain references to other applications. In this example WordPress application references MySQL in property "database":
 
     .. code-block:: yaml
+
         applications:
         - '?':
             _26411a1861294160833743e45d0eaad9: {name: MySQL}
@@ -105,6 +107,7 @@ Transformed to these rules:
 Also if we define inner object inside other object, they will have relationship between them:
 
     .. code-block:: yaml
+
         applications:
         - '?':
             _26411a1861294160833743e45d0eaad9: {name: MySQL}
