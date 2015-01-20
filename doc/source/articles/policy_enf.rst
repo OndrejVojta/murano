@@ -20,7 +20,7 @@ Murano Policy Enforcement Example
 
 4. Create **predeploy_error** rule
 
-    Then we create this rule which references **flavor_ram** rule we created before:
+    Then we create this rule which references **flavor_ram** rule we created before. It disables flavors with ram higher than 2048 MB and constructs message returned to the user in *msg* variable.
 
     .. code-block:: console
 
