@@ -3,10 +3,27 @@ Murano Policy Enforcement Example
 =================================
 
 1. Enable policy enforcement in murano
-    - murano.conf
+    - edit */etc/murano/murano.conf*:
+
+    .. code-block:: ini
+
+        [engine]
+        # Enable model policy enforcer using Congress (boolean value)
+        enable_model_policy_enforcer = true
+    ..
+
+    - restart murano
 
 2. Create **murano** and **murano_system** policy
-    - if not done by datasource driver
+    - Check if policies **murano** and **murano_system** were created by datasource driver:
+        ``congress policy list``
+    - If there is no **murano** and **murano_system** then create them by these commands:
+
+    .. code-block:: console
+
+        congress policy create murano
+        congress policy create murano_system
+    ..
 
 3. Create **flavor_ram** rule
     We create the rule that resolves parameters of flavor by flavor name and returns *ram* parameter. It uses rule *flavors* from *nova* policy.
@@ -41,8 +58,11 @@ Murano Policy Enforcement Example
     ..
 
 5. Create environment with simple application
-    - Choose with **"m1.medium"** instance flavor
-    - instance creation picture
+    - Choose Git application from murano applications
+    - Create with **"m1.medium"** instance flavor
+
+    .. image:: new-instance.png
+
 
 6. Deploy environment
     - environment is in Status: Deploy FAILURE
