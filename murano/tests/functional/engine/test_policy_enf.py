@@ -22,12 +22,18 @@ import uuid
 
 
 CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
-                  'predeploy_error(obj_id) :- '
-                  'murano:property(obj_id, "flavor", prop_value), '
-                  'invalid_flavor_name(prop_value)',
-                  'predeploy_error(obj_id) :- '
-                  'murano:property(obj_id, "keyname", prop_value), '
-                  'missing_key(prop_value)',
+                  'predeploy_error(eid, obj_id, msg):-'
+                  'murano:object(obj_id, eid, type),'
+                  'murano:property(obj_id, "flavor", flavor_name),'
+                  'invalid_flavor_name(flavor_name),'
+                  'murano:property(obj_id, "name", obj_name),'
+                  'concat(obj_name, ": bad flavor", msg)',
+                  'predeploy_error(eid, obj_id, msg):-'
+                  'murano:object(obj_id, eid, type),'
+                  'murano:property(obj_id, "keyname", key_name),'
+                  'missing_key(key_name),'
+                  'murano:property(obj_id, "name", obj_name),'
+                  'concat(obj_name, ": missing key", msg)',
                   'missing_key("")']
 
 
@@ -110,22 +116,26 @@ class PolicyEnforcement(testtools.TestCase, common.DeployTestMixin):
             }
         }
 
-    def _check_deploy_failure(self, post_body):
+    def _check_deploy_failure(self, post_body, expected_text):
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
         env = self.deploy_apps(environment_name, post_body)
         status = self._wait_for_final_status(env)
         self.assertIn("failure", status[0], "Unexpected status : " + status[0])
-        self.assertIn("model validation", status[1].lower(),
+        self.assertIn(expected_text, status[1].lower(),
                       "Unexpected status : " + status[1])
 
     def test_deploy_policy_fail_flavor(self):
         """test expects failure due to blacklisted flavor"""
 
-        self._check_deploy_failure(self._create_env_body(
-            flavor="really.bad.flavor", key="test-key"))
+        self._check_deploy_failure(
+            self._create_env_body(flavor="really.bad.flavor",
+                                  key="test-key"),
+            "bad flavor")
 
     def test_deploy_policy_fail_key(self):
         """test expects failure due to empty key name"""
 
-        self._check_deploy_failure(self._create_env_body(
-            key="", flavor="m1.small"))
+        self._check_deploy_failure(
+            self._create_env_body(key="",
+                                  flavor="m1.small"),
+            "missing key")
