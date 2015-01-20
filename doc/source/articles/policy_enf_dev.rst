@@ -12,9 +12,16 @@ Congress Integration
 Model Decomposition
 -------------------
 
-Models of Murano applications are transformed to set of rules that are processed by congress. This represent data for policy validation. There are several "tables" created in murano policy for different kind of rules:
+Models of Murano applications are transformed to set of rules that are processed by congress. This represent data for policy validation.
 
-``murano:object+(environment_id, object_id, type_name)``
+There are several "tables" created in murano policy for different kind of rules:
+
+- ``murano:object(environment_id, object_id, type_name)``
+- ``murano:property(object_id, property_name, property_value)``
+- ``murano:relationship(source, target, name)``
+- ``murano:parent_type(object_id, parent_name)``
+
+``murano:object(environment_id, object_id, type_name)``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
 This rule is used for representation of all objects in murano model (environment, applications, instances, ...):
 
@@ -33,7 +40,7 @@ Transformed to these rules:
 - ``murano:object+("83bff5acf8354816b08cf9b4917c898d", "e7a13d3c-b3c9-42fa-975d-a47b142fd233", "io.murano.databases.MySql")``
 
 
-``murano:property+(object_id, property_name, property_value)``
+``murano:property(object_id, property_name, property_value)``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 Each object can have properties. In this example we have application with one property:
 
@@ -81,7 +88,7 @@ There is one special property on environment for tenant_id:
 
 - ``murano:property+("...", "tenant_id", "123")``
 
-``murano:relationship+(source, target, name)``
+``murano:relationship(source, target, name)``
 """"""""""""""""""""""""""""""""""""""""""""""
 Murano app models can contain references to other applications. In this example WordPress application references MySQL in property "database":
 
@@ -121,7 +128,7 @@ Transformed to these rules:
 
 - ``murano:relationship+("0aafd67e-72e9-4ae0-bb62-fe724f77df2a", "ed8df2b0-ddd2-4009-b3c9-2e7a368f3cb8", "instance")``
 
-murano:parent_type+(object_id, parent_name)
+murano:parent_type(object_id, parent_name)
 """""""""""""""""""""""""""""""""""""""""""
 Each object in murano has class type and these classes can inherit from one or more parents:
 
