@@ -151,4 +151,6 @@ Transformed to these rules:
 - ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.LinuxInstance")``
 - ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.Instance")``
 
-.. note:: ``io.murano.resources.LinuxMuranoInstance`` is parent too for easier handling of user-created rules.
+.. note:: Type of object is also repeated among parent types (``io.murano.resources.LinuxMuranoInstance`` in example) for easier handling of user-created rules.
+
+.. note:: If type inherits from more than one parent and those parents inherit from one common type, ``parent_type`` rule is included only once for common type.
