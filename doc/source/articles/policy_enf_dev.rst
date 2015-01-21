@@ -28,15 +28,15 @@ This rule is used for representation of all objects in murano model (environment
     .. code-block:: yaml
 
         name: wordpress-env
-        '?': {type: io.murano.Environment, id: 83bff5acf8354816b08cf9b4917c898d}
+        '?': {type: io.murano.Environment, id: 83bff5ac}
         applications:
-        - '?': {id: e7a13d3c-b3c9-42fa-975d-a47b142fd233, type: io.murano.databases.MySql}
+        - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
     ..
 
 Transformed to these rules:
 
-- ``murano:object+("83bff5acf8354816b08cf9b4917c898d", "83bff5acf8354816b08cf9b4917c898d", "io.murano.Environment")``
-- ``murano:object+("83bff5acf8354816b08cf9b4917c898d", "e7a13d3c-b3c9-42fa-975d-a47b142fd233", "io.murano.databases.MySql")``
+- ``murano:object+("83bff5ac", "83bff5ac", "io.murano.Environment")``
+- ``murano:object+("83bff5ac", "e7a13d3c", "io.murano.databases.MySql")``
 
 .. note:: In case of rule for environment ``environment_id``, ``object_id`` are the same.
 
@@ -48,42 +48,42 @@ Each object can have properties. In this example we have application with one pr
     .. code-block:: yaml
 
         applications:
-        - '?': {id: e7a13d3c-b3c9-42fa-975d-a47b142fd233, type: io.murano.databases.MySql}
+        - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
         database: wordpress
     ..
 
 Transformed to these rules:
 
-- ``murano:property+("e7a13d3c-b3c9-42fa-975d-a47b142fd233", "database", "wordpress")``
+- ``murano:property+("e7a13d3c", "database", "wordpress")``
 
 Inner properties are also supported using dot notation:
 
     .. code-block:: yaml
 
         instance:
-        '?': {id: 825dc61d-217a-4fd8-80fc-43807f8d6fa2, type: io.murano.resources.LinuxMuranoInstance}
+        '?': {id: 825dc61d, type: io.murano.resources.LinuxMuranoInstance}
         networks:
           useFlatNetwork: false
     ..
 
 Transformed to these rules:
 
-- ``murano:property+("825dc61d-217a-4fd8-80fc-43807f8d6fa2", "networks.useFlatNetwork", "False")``
+- ``murano:property+("825dc61d", "networks.useFlatNetwork", "False")``
 
 If model contains list of values it is represented as set of multiple rules:
 
     .. code-block:: yaml
 
         instances:
-        - '?': {id: be3c5155-6670-4cf6-9a28-a4574ff70b71, type: io.murano.resources.LinuxMuranoInstance}
+        - '?': {id: be3c5155, type: io.murano.resources.LinuxMuranoInstance}
         networks:
           customNetworks: [10.0.1.0, 10.0.2.0]
     ..
 
 Transformed to these rules:
 
-- ``murano:property+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "networks.customNetworks", "10.0.1.0")``
-- ``murano:property+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "networks.customNetworks", "10.0.2.0")``
+- ``murano:property+("be3c5155", "networks.customNetworks", "10.0.1.0")``
+- ``murano:property+("be3c5155", "networks.customNetworks", "10.0.2.0")``
 
 There is one special property on environment for tenant_id:
 
@@ -97,19 +97,17 @@ Murano app models can contain references to other applications. In this example 
 
         applications:
         - '?':
-            _26411a1861294160833743e45d0eaad9: {name: MySQL}
-            id: 0aafd67e-72e9-4ae0-bb62-fe724f77df2a
+            id: 0aafd67e
             type: io.murano.databases.MySql
         - '?':
-            _26411a1861294160833743e45d0eaad9: {name: WordPress}
-            id: 50fa68ff-cd9a-4845-b573-2c80879d158d
+            id: 50fa68ff
             type: io.murano.apps.WordPress
-          database: 0aafd67e-72e9-4ae0-bb62-fe724f77df2a
+          database: 0aafd67e
     ..
 
 Transformed to these rules:
 
-- ``murano:relationship+("50fa68ff-cd9a-4845-b573-2c80879d158d", "0aafd67e-72e9-4ae0-bb62-fe724f77df2a", "database")``
+- ``murano:relationship+("50fa68ff", "0aafd67e", "database")``
 
 .. note:: For property "database" we do not create rule ``murano:property+``.
 
@@ -119,16 +117,15 @@ Also if we define inner object inside other object, they will have relationship 
 
         applications:
         - '?':
-            _26411a1861294160833743e45d0eaad9: {name: MySQL}
-            id: 0aafd67e-72e9-4ae0-bb62-fe724f77df2a
+            id: 0aafd67e
             type: io.murano.databases.MySql
           instance:
-            '?': {id: ed8df2b0-ddd2-4009-b3c9-2e7a368f3cb8, type: io.murano.resources.LinuxMuranoInstance}
+            '?': {id: ed8df2b0, type: io.murano.resources.LinuxMuranoInstance}
     ..
 
 Transformed to these rules:
 
-- ``murano:relationship+("0aafd67e-72e9-4ae0-bb62-fe724f77df2a", "ed8df2b0-ddd2-4009-b3c9-2e7a368f3cb8", "instance")``
+- ``murano:relationship+("0aafd67e", "ed8df2b0", "instance")``
 
 murano:parent_type(object_id, parent_name)
 """""""""""""""""""""""""""""""""""""""""""
@@ -141,15 +138,15 @@ So this model:
     .. code-block:: yaml
 
         instances:
-        - '?': {id: be3c5155-6670-4cf6-9a28-a4574ff70b71, type: io.murano.resources.LinuxMuranoInstance}
+        - '?': {id: be3c5155, type: io.murano.resources.LinuxMuranoInstance}
     ..
 
 Transformed to these rules:
 
-- ``murano:object+("...", "be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.LinuxMuranoInstance")``
-- ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.LinuxMuranoInstance")``
-- ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.LinuxInstance")``
-- ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.Instance")``
+- ``murano:object+("...", "be3c5155", "io.murano.resources.LinuxMuranoInstance")``
+- ``murano:parent_type+("be3c5155", "io.murano.resources.LinuxMuranoInstance")``
+- ``murano:parent_type+("be3c5155", "io.murano.resources.LinuxInstance")``
+- ``murano:parent_type+("be3c5155", "io.murano.resources.Instance")``
 
 .. note:: Type of object is also repeated among parent types (``io.murano.resources.LinuxMuranoInstance`` in example) for easier handling of user-created rules.
 
