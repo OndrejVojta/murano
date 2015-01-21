@@ -131,25 +131,23 @@ murano:parent_type(object_id, parent_name)
 """""""""""""""""""""""""""""""""""""""""""
 Each object in murano has class type and these classes can inherit from one or more parents:
 
-- e.g. ``io.murano.resources.LinuxMuranoInstance``
-    - inherits from ``io.murano.resources.LinuxInstance``
-        - inherits form ``io.murano.resources.Instance``
+e.g. ``LinuxMuranoInstance`` > ``LinuxInstance`` > ``Instance``
 
 So this model:
 
     .. code-block:: yaml
 
         instances:
-        - '?': {id: be3c5155, type: io.murano.resources.LinuxMuranoInstance}
+        - '?': {id: be3c5155, type: LinuxMuranoInstance}
     ..
 
 Transformed to these rules:
 
-- ``murano:object+("...", "be3c5155", "io.murano.resources.LinuxMuranoInstance")``
-- ``murano:parent_type+("be3c5155", "io.murano.resources.LinuxMuranoInstance")``
-- ``murano:parent_type+("be3c5155", "io.murano.resources.LinuxInstance")``
-- ``murano:parent_type+("be3c5155", "io.murano.resources.Instance")``
+- ``murano:object+("...", "be3c5155", "LinuxMuranoInstance")``
+- ``murano:parent_type+("be3c5155", "LinuxMuranoInstance")``
+- ``murano:parent_type+("be3c5155", "LinuxInstance")``
+- ``murano:parent_type+("be3c5155", "Instance")``
 
-.. note:: Type of object is also repeated among parent types (``io.murano.resources.LinuxMuranoInstance`` in example) for easier handling of user-created rules.
+.. note:: Type of object is also repeated among parent types (``LinuxMuranoInstance`` in example) for easier handling of user-created rules.
 
 .. note:: If type inherits from more than one parent and those parents inherit from one common type, ``parent_type`` rule is included only once for common type.
