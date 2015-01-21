@@ -30,7 +30,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
     obj.to_dictionary = mock.Mock(return_value=model_dict)
 
     task = {
-        'action': 'action',
+        'action': {'method': 'deploy'},
         'model': {'Objects': None},
         'token': 'token',
         'tenant_id': 'environment.tenant_id',
@@ -55,7 +55,8 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor._model_policy_enforcer = mock.Mock()
 
         config.CONF.engine.enable_model_policy_enforcer = False
-        executor._validate_model(self.obj, self.class_loader)
+        executor._validate_model(self.obj, self.task['action'],
+                                 self.class_loader)
 
         self.assertFalse(executor._model_policy_enforcer.validate.called)
 
@@ -64,10 +65,12 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor._model_policy_enforcer = mock.Mock()
 
         config.CONF.engine.enable_model_policy_enforcer = True
-        executor._validate_model(self.obj, self.class_loader)
+        executor._validate_model(self.obj, self.task['action'],
+                                 self.class_loader)
 
         executor._model_policy_enforcer \
             .validate.assert_called_once_with(self.model_dict,
+                                              'deploy',
                                               self.class_loader)
 
     def test_validation_pass(self):
@@ -75,7 +78,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
             {"result": []}
         model = {'?': {'id': '123', 'type': 'class'}}
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
-        enforcer.validate(model)
+        enforcer.validate(model, 'deploy')
 
     def test_validation_failure(self):
         self.congress_client_mock.execute_policy_action.return_value = \
@@ -84,7 +87,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         model = {'?': {'id': '123', 'type': 'class'}}
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
         self.assertRaises(model_policy_enforcer.ValidationError,
-                          enforcer.validate, model)
+                          enforcer.validate, model, 'deploy')
 
     def test_parse_result(self):
         congress_response = [
@@ -113,3 +116,11 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         self.assertTrue("Instance 'instance2' in env 'env1' has problem"
                         in result)
         self.assertTrue("Some problem" in result)
+
+    def test_action_not_deploy(self):
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
+
+        enforcer.validate(self.obj, 'not_deploy')
+
+        self.assertFalse(
+            self.congress_client_mock.execute_policy_action.called)

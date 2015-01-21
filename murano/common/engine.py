@@ -135,7 +135,7 @@ class TaskExecutor(object):
         exc = executor.MuranoDslExecutor(class_loader, self.environment)
         obj = exc.load(self.model)
 
-        self._validate_model(obj, class_loader)
+        self._validate_model(obj, self.action, class_loader)
 
         try:
             # Skip execution of action in case of no action is provided.
@@ -156,10 +156,11 @@ class TaskExecutor(object):
         result['SystemData'] = self._environment.system_attributes
         return result
 
-    def _validate_model(self, obj, class_loader):
+    def _validate_model(self, obj, action, class_loader):
         if config.CONF.engine.enable_model_policy_enforcer:
-            if obj is not None:
+            if obj is not None and action is not None:
                 self._model_policy_enforcer.validate(obj.to_dictionary(),
+                                                     action['method'],
                                                      class_loader)
 
     def _invoke(self, mpl_executor):

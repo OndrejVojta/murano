@@ -28,42 +28,38 @@ class ValidationError(Exception):
 class ModelPolicyEnforcer(object):
     """Policy Enforcer Implementation using Congress client
 
-    Converts murano model to list of congress rules:
+    Converts murano model to list of congress data rules:
         murano:object+(env_id, obj_id, type_name)
         murano:property+(obj_id, prop_name, prop_value)
 
-    Then we ask congress to resolve "predeploy_error(x)" table to return
-    validation results.
-
-    Example:
-        Using these commands we can create rules in congress to disable
-        instances with "m1.small" flavor:
-            - congress policy create murano
-            - congress policy create murano_system
-            - congress policy rule create murano_system \
-                "invalid_flavor_name(\"m1.small\")"
-            - congress policy rule create murano_system
-                "predeploy_error(obj_id) :-
-                murano:property(obj_id, \"flavor\", prop_value),
-                invalid_flavor_name(prop_value)"
+    Then we ask congress using simulation api of congress rest client
+    to resolve "murano_system:predeploy_error(env_id, obj_id, msg)"
+    table along with congress data rules to return validation results.
     """
 
     def __init__(self, environment):
         self._environment = environment
         self._client_manager = environment.clients
 
-    def validate(self, model, class_loader=None):
+    def validate(self, model, action_name, class_loader=None):
         """Validate model using Congress rule engine.
 
         @type model: dict
         @param model: Dictionary representation of model starting on
                       environment level (['Objects'])
+        @type action_name: string
+        @param action_name: name of the action for which validation is called
         @type class_loader: murano.dsl.class_loader.MuranoClassLoader
         @param class_loader: Optional. Used for evaluating parent class types
         @raises ValidationError in case validation was not successful
         """
 
         if model is None:
+            return
+
+        if action_name != 'deploy':
+            LOG.debug("Skipping validation for action '{0}'"
+                      .format(action_name))
             return
 
         client = self._client_manager.get_congress_client(self._environment)
