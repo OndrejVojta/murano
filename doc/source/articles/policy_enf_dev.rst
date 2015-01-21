@@ -36,8 +36,9 @@ This rule is used for representation of all objects in murano model (environment
 Transformed to these rules:
 
 - ``murano:object+("83bff5acf8354816b08cf9b4917c898d", "83bff5acf8354816b08cf9b4917c898d", "io.murano.Environment")``
-        - in case of environment ``environment_id``, ``object_id`` are the same
 - ``murano:object+("83bff5acf8354816b08cf9b4917c898d", "e7a13d3c-b3c9-42fa-975d-a47b142fd233", "io.murano.databases.MySql")``
+
+.. note:: In case of rule for environment ``environment_id``, ``object_id`` are the same.
 
 
 ``murano:property(object_id, property_name, property_value)``
@@ -109,7 +110,8 @@ Murano app models can contain references to other applications. In this example 
 Transformed to these rules:
 
 - ``murano:relationship+("50fa68ff-cd9a-4845-b573-2c80879d158d", "0aafd67e-72e9-4ae0-bb62-fe724f77df2a", "database")``
-    - for property "database" we do not create rule ``murano:property+``
+
+.. note:: For property "database" we do not create rule ``murano:property+``.
 
 Also if we define inner object inside other object, they will have relationship between them:
 
@@ -146,6 +148,7 @@ Transformed to these rules:
 
 - ``murano:object+("...", "be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.LinuxMuranoInstance")``
 - ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.LinuxMuranoInstance")``
-    - repeated again for easier handling of user-created rules
 - ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.LinuxInstance")``
 - ``murano:parent_type+("be3c5155-6670-4cf6-9a28-a4574ff70b71", "io.murano.resources.Instance")``
+
+.. note:: ``io.murano.resources.LinuxMuranoInstance`` is parent too for easier handling of user-created rules.
