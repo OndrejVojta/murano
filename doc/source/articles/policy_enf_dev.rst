@@ -25,13 +25,13 @@ There are several "tables" created in murano policy for different kind of rules:
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
 This rule is used for representation of all objects in murano model (environment, applications, instances, ...):
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        name: wordpress-env
-        '?': {type: io.murano.Environment, id: 83bff5ac}
-        applications:
-        - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
-    ..
+    name: wordpress-env
+    '?': {type: io.murano.Environment, id: 83bff5ac}
+    applications:
+    - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
+..
 
 Transformed to these rules:
 
@@ -45,12 +45,12 @@ Transformed to these rules:
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 Each object can have properties. In this example we have application with one property:
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        applications:
-        - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
-        database: wordpress
-    ..
+    applications:
+    - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
+    database: wordpress
+..
 
 Transformed to these rules:
 
@@ -58,13 +58,13 @@ Transformed to these rules:
 
 Inner properties are also supported using dot notation:
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        instance:
-        '?': {id: 825dc61d, type: io.murano.resources.LinuxMuranoInstance}
-        networks:
-          useFlatNetwork: false
-    ..
+    instance:
+    '?': {id: 825dc61d, type: io.murano.resources.LinuxMuranoInstance}
+    networks:
+      useFlatNetwork: false
+..
 
 Transformed to these rules:
 
@@ -72,13 +72,13 @@ Transformed to these rules:
 
 If model contains list of values it is represented as set of multiple rules:
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        instances:
-        - '?': {id: be3c5155, type: io.murano.resources.LinuxMuranoInstance}
-        networks:
-          customNetworks: [10.0.1.0, 10.0.2.0]
-    ..
+    instances:
+    - '?': {id: be3c5155, type: io.murano.resources.LinuxMuranoInstance}
+    networks:
+      customNetworks: [10.0.1.0, 10.0.2.0]
+..
 
 Transformed to these rules:
 
@@ -93,17 +93,17 @@ There is one special property on environment for tenant_id:
 """"""""""""""""""""""""""""""""""""""""""""""
 Murano app models can contain references to other applications. In this example WordPress application references MySQL in property "database":
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        applications:
-        - '?':
-            id: 0aafd67e
-            type: io.murano.databases.MySql
-        - '?':
-            id: 50fa68ff
-            type: io.murano.apps.WordPress
-          database: 0aafd67e
-    ..
+    applications:
+    - '?':
+        id: 0aafd67e
+        type: io.murano.databases.MySql
+    - '?':
+        id: 50fa68ff
+        type: io.murano.apps.WordPress
+      database: 0aafd67e
+..
 
 Transformed to these rules:
 
@@ -113,15 +113,15 @@ Transformed to these rules:
 
 Also if we define inner object inside other object, they will have relationship between them:
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        applications:
-        - '?':
-            id: 0aafd67e
-            type: io.murano.databases.MySql
-          instance:
-            '?': {id: ed8df2b0, type: io.murano.resources.LinuxMuranoInstance}
-    ..
+    applications:
+    - '?':
+        id: 0aafd67e
+        type: io.murano.databases.MySql
+      instance:
+        '?': {id: ed8df2b0, type: io.murano.resources.LinuxMuranoInstance}
+..
 
 Transformed to these rules:
 
@@ -135,11 +135,11 @@ e.g. ``LinuxMuranoInstance`` > ``LinuxInstance`` > ``Instance``
 
 So this model:
 
-    .. code-block:: yaml
+.. code-block:: yaml
 
-        instances:
-        - '?': {id: be3c5155, type: LinuxMuranoInstance}
-    ..
+    instances:
+    - '?': {id: be3c5155, type: LinuxMuranoInstance}
+..
 
 Transformed to these rules:
 
