@@ -131,7 +131,9 @@ murano:parent_type(object_id, parent_name)
 """""""""""""""""""""""""""""""""""""""""""
 Each object in murano has class type and these classes can inherit from one or more parents:
 
-- e.g. ``io.murano.resources.LinuxMuranoInstance`` inherits from ``io.murano.resources.LinuxInstance`` which inherits form ``io.murano.resources.Instance``
+- e.g. ``io.murano.resources.LinuxMuranoInstance``
+    - inherits from ``io.murano.resources.LinuxInstance``
+        - inherits form ``io.murano.resources.Instance``
 
 So this model:
 
