@@ -35,15 +35,15 @@ class CongressRules(object):
 
         self._env_id = model['?']['id']
 
-        # arbitrary property for tenant_id
+        # Arbitrary property for tenant_id.
         if tenant_id is not None:
             r = MuranoProperty(self._env_id, 'tenant_id', tenant_id)
             self._rules.append(r)
 
         self._walk(model, self._process_item)
 
-        # convert MuranoProperty containing reference to another object
-        # to MuranoRelationship
+        # Convert MuranoProperty containing reference to another object
+        # to MuranoRelationship.
         object_ids = [rule.obj_id for rule in self._rules
                       if isinstance(rule, MuranoObject)]
 
@@ -79,7 +79,7 @@ class CongressRules(object):
 
     @staticmethod
     def _to_dict(obj):
-        # if we have MuranoObject class we need to convert to dictionary
+        # If we have MuranoObject class we need to convert to dictionary.
         if 'to_dictionary' in dir(obj):
             return obj.to_dictionary()
         else:
@@ -92,7 +92,7 @@ class CongressRules(object):
     def _create_propety_rules(self, obj_id, obj, prefix=""):
         rules = []
 
-        # skip when inside properties of other object
+        # Skip when inside properties of other object.
         if '?' in obj and prefix != "":
             rules.append(MuranoRelationship(obj_id, obj['?']['id'],
                                             prefix.split('.')[0]))

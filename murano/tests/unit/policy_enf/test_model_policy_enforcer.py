@@ -91,31 +91,18 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
     def test_parse_result(self):
         congress_response = [
-            "",
-            "unexpected response",
-
-            "predeploy_error(\"env1\","
-            "\"instance1\","
-            "\"Instance '{1}' in env '{0}' has problem\")",
-
-            "predeploy_error(\"env1\","
-            " \"instance2\","
-            " \"Instance '{1}' in env '{0}' has problem\")",
-
-            "predeploy_error(\"env1\","
-            " \"instance2\","
-            " \"Some problem\")"]
+            'unexpected response',
+            'predeploy_error("env1","instance1","Instance 1 has problem")',
+            'predeploy_error("env1","instance1","Instance 2 has problem")'
+        ]
 
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
-        result = enforcer._result_to_str(congress_response)
+        result = enforcer._parse_messages(congress_response)
         print result
 
         self.assertTrue("unexpected response" in result)
-        self.assertTrue("Instance 'instance1' in env 'env1' has problem"
-                        in result)
-        self.assertTrue("Instance 'instance2' in env 'env1' has problem"
-                        in result)
-        self.assertTrue("Some problem" in result)
+        self.assertTrue("Instance 1 has problem" in result)
+        self.assertTrue("Instance 2 has problem" in result)
 
     def test_action_not_deploy(self):
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)

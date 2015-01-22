@@ -13,9 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from murano.policy_enf import congress_rules
 import re
 
+from murano.policy_enf import congress_rules
+
+from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -23,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 class ValidationError(Exception):
     """Raised for validation errors."""
+    pass
 
 
 class ModelPolicyEnforcer(object):
@@ -58,22 +61,24 @@ class ModelPolicyEnforcer(object):
             return
 
         if action_name != 'deploy':
-            LOG.debug("Skipping validation for action '{0}'"
+            LOG.debug(_("Skipping validation for action '{0}'")
                       .format(action_name))
             return
 
         client = self._client_manager.get_congress_client(self._environment)
         if not client:
-            raise ValueError('Congress client is not configured!')
+            raise ValueError(_('Congress client is not configured!'))
 
-        LOG.info('Validating model')
+        LOG.info(_('Validating model'))
         LOG.debug(model)
 
         rules = congress_rules.CongressRules() \
-            .convert(model, class_loader, self._environment.tenant_id)
+            .convert(model, class_loader,
+                     self._environment.tenant_id)
 
         rules_str = " ".join(map(str, rules))
-        LOG.debug('Congress rules: \n  ' + "\n  ".join(map(str, rules)) + '\n')
+        LOG.debug(_('Congress rules:') +
+                  ' \n  ' + '\n  '.join(map(str, rules)) + '\n')
 
         validation_result = client.execute_policy_action(
             "murano_system",
@@ -85,19 +90,30 @@ class ModelPolicyEnforcer(object):
             'sequence': rules_str})
 
         if validation_result["result"]:
-            result_str = self._result_to_str(validation_result["result"])
-            raise ValidationError("Model validation failed:" + result_str)
+            messages = self._parse_messages(validation_result["result"])
+            result_str = "\n  ".join(map(str, messages))
+            raise ValidationError(_("Model validation failed:") +
+                                  "\n  " + result_str)
         else:
-            LOG.info('Model valid')
+            LOG.info(_('Model valid'))
 
-    def _result_to_str(self, results):
-        s = ''
+    def _parse_messages(self, results):
+        """Transforms list of strings in format
+            ['predeploy_error("env_id_1", "obj_id_1", "message1")',
+            'predeploy_error("env_id_2", "obj_id_2", "message2")']
+        to list of strings with message only
+            ['message1', 'message2']
+        """
+
+        messages = []
         regexp = 'predeploy_error\("([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\)'
         for result in results:
-            s += '\n  '
             match = re.search(regexp, result)
             if match:
-                s += match.group(3).format(match.group(1), match.group(2))
+                messages.append(match.group(3))
             else:
-                s += result
-        return s
+                # If we didn't find 'predeploy_error' add whole string.
+                # It may be some problem in congress.
+                messages.append(result)
+
+        return messages
