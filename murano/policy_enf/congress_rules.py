@@ -40,6 +40,9 @@ class CongressRules(object):
             r = MuranoProperty(self._env_id, 'tenant_id', tenant_id)
             self._rules.append(r)
 
+        state_rule = MuranoState(self._env_id, 'PENDING')
+        self._rules.append(state_rule)
+
         self._walk(model, self._process_item)
 
         # Convert MuranoProperty containing reference to another object
@@ -196,3 +199,13 @@ class MuranoParentType(object):
     def __str__(self):
         return 'murano:parent_type+("{0}", "{1}")' \
             .format(self.obj_id, self.type_name)
+
+
+class MuranoState(object):
+    def __init__(self, obj_id, state):
+        self.obj_id = obj_id
+        self.state = state
+
+    def __str__(self):
+        return 'murano:state+("{0}", "{1}")' \
+            .format(self.obj_id, self.state)

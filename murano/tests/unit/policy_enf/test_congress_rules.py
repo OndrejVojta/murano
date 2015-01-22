@@ -218,3 +218,10 @@ class TestCongressRules(unittest.TestCase):
 
         if len(s) > 0:
             self.fail(s)
+
+    def test_state_rule(self):
+        rules_str = self._create_rules_str('model.yaml')
+
+        self.assertTrue(
+            'murano:state+("c86104748a0c4907b4c5981e6d3bce9f", "PENDING")'
+            in rules_str)
