@@ -81,7 +81,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
     def test_validation_failure(self):
         self.congress_client_mock.execute_policy_action.return_value = \
-            {"result": ["failure"]}
+            {"result": ['predeploy_error("123","instance1","failure")']}
 
         model = {'?': {'id': '123', 'type': 'class'}}
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
@@ -92,16 +92,18 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         congress_response = [
             'unexpected response',
             'predeploy_error("env1","instance1","Instance 1 has problem")',
-            'predeploy_error("env1","instance1","Instance 2 has problem")'
+            'predeploy_error("env1","instance1","Instance 2 has problem")',
+            'predeploy_error("env2","instance1","Instance 3 has problem")'
         ]
 
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
-        result = enforcer._parse_messages(congress_response)
+        result = enforcer._parse_messages('env1', congress_response)
         print result
 
-        self.assertTrue("unexpected response" in result)
+        self.assertFalse("unexpected response" in result)
         self.assertTrue("Instance 1 has problem" in result)
         self.assertTrue("Instance 2 has problem" in result)
+        self.assertFalse("Instance 3 has problem" in result)
 
     def test_action_not_deploy(self):
         executor = engine.TaskExecutor(self.task)

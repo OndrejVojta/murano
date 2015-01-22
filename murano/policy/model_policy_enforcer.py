@@ -81,19 +81,25 @@ class ModelPolicyEnforcer(object):
             'sequence': rules_str})
 
         if validation_result["result"]:
-            messages = self._parse_messages(validation_result["result"])
-            result_str = "\n  ".join(map(str, messages))
-            raise ValidationError(_("Model validation failed:") +
-                                  "\n  " + result_str)
+
+            env_id = model['?']['id']
+            messages = self._parse_messages(env_id,
+                                            validation_result["result"])
+
+            if messages:
+                result_str = "\n  ".join(map(str, messages))
+                raise ValidationError(_("Model validation failed:") +
+                                      "\n  " + result_str)
         else:
             LOG.info(_('Model valid'))
 
-    def _parse_messages(self, results):
+    def _parse_messages(self, env_id, results):
         """Transforms list of strings in format
             ['predeploy_error("env_id_1", "obj_id_1", "message1")',
             'predeploy_error("env_id_2", "obj_id_2", "message2")']
-        to list of strings with message only
-            ['message1', 'message2']
+        to list of strings with message only filtered to provided
+        env_id (e.g. 'env_id_1'):
+            ['message2']
         """
 
         messages = []
@@ -101,10 +107,7 @@ class ModelPolicyEnforcer(object):
         for result in results:
             match = re.search(regexp, result)
             if match:
-                messages.append(match.group(3))
-            else:
-                # If we didn't find 'predeploy_error' add whole string.
-                # It may be some problem in congress.
-                messages.append(result)
+                if env_id in match.group(1):
+                    messages.append(match.group(3))
 
         return messages
