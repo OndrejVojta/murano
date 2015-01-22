@@ -18,7 +18,7 @@ import os.path
 import unittest2 as unittest
 import yaml
 
-import murano.policy_enf.congress_rules as congress
+import murano.policy.congress_rules as congress
 
 
 class MockClassLoader(object):

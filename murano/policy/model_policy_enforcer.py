@@ -15,7 +15,7 @@
 
 import re
 
-from murano.policy_enf import congress_rules
+from murano.policy import congress_rules
 
 from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging

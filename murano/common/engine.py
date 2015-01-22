@@ -35,7 +35,7 @@ from murano.engine.system import status_reporter
 import murano.engine.system.system_objects as system_objects
 from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
-from murano.policy_enf import model_policy_enforcer as enforcer
+from murano.policy import model_policy_enforcer as enforcer
 
 RPC_SERVICE = None
 

@@ -18,7 +18,7 @@ import mock
 from murano.common import config
 from murano.common import engine
 from murano.engine import client_manager
-from murano.policy_enf import model_policy_enforcer
+from murano.policy import model_policy_enforcer
 from murano.tests.unit import base
 
 
