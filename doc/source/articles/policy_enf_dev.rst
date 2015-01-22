@@ -20,6 +20,7 @@ There are several "tables" created in murano policy for different kind of rules:
 - ``murano:property(object_id, property_name, property_value)``
 - ``murano:relationship(source, target, name)``
 - ``murano:parent_type(object_id, parent_name)``
+- ``murano:state(environment_id, state)``
 
 ``murano:object(environment_id, object_id, type_name)``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -151,3 +152,9 @@ Transformed to these rules:
 .. note:: Type of object is also repeated among parent types (``LinuxMuranoInstance`` in example) for easier handling of user-created rules.
 
 .. note:: If type inherits from more than one parent and those parents inherit from one common type, ``parent_type`` rule is included only once for common type.
+
+murano:state(environment_id, state)
+"""""""""""""""""""""""""""""""""""""""""""
+Currently only one record for environment is created:
+
+- ``murano:state+("uugi324", "PENDING")``
