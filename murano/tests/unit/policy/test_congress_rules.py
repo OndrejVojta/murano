@@ -85,15 +85,15 @@ class TestCongressRules(unittest.TestCase):
         rules_str = self._create_rules_str('model_with_relations.yaml')
 
         self.assertFalse(
-            'murano:property+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
+            'murano:properties+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
             '"server", "8ce94f23-f16a-40a1-9d9d-a877266c315d")' in rules_str)
 
         self.assertTrue(
-            'murano:relationship+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
+            'murano:relationships+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
             '"8ce94f23-f16a-40a1-9d9d-a877266c315d", "server")' in rules_str)
 
         self.assertTrue(
-            'murano:relationship+("0aafd67e-72e9-4ae0-bb62-fe724f77df2a", '
+            'murano:relationships+("0aafd67e-72e9-4ae0-bb62-fe724f77df2a", '
             '"ed8df2b0-ddd2-4009-b3c9-2e7a368f3cb8", "instance")' in rules_str)
 
     def test_convert_model_complex(self):
@@ -120,19 +120,19 @@ class TestCongressRules(unittest.TestCase):
         rules_str = self._create_rules_str('model.yaml', class_loader)
 
         self.assertTrue(
-            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            'murano:parent_types+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "parent1")' in rules_str)
 
         self.assertTrue(
-            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            'murano:parent_types+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "parent2")' in rules_str)
 
         self.assertTrue(
-            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            'murano:parent_types+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "grand-parent")' in rules_str)
 
         self.assertTrue(
-            'murano:parent_type+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
+            'murano:parent_types+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
             ' "io.murano.apps.linux.Git")' in rules_str)
 
     def test_to_dictionary(self):
@@ -163,17 +163,18 @@ class TestCongressRules(unittest.TestCase):
         rules_str = ", \n".join(map(str, rules))
         print rules_str
 
-        self.assertTrue('murano:object+("1", "1", "t1")' in rules_str)
-        self.assertTrue('murano:object+("2", "1", "t2")' in rules_str)
-        self.assertTrue('murano:object+("3", "1", "t3")' in rules_str)
+        self.assertTrue('murano:objects+("1", "1", "t1")' in rules_str)
+        self.assertTrue('murano:objects+("2", "1", "t2")' in rules_str)
+        self.assertTrue('murano:objects+("3", "1", "t3")' in rules_str)
 
     def test_tenant_id(self):
         model = self._load_file("model.yaml")
         congress_rules = congress.CongressRules()
         rules = congress_rules.convert(model, tenant_id='tenant1')
         rules_str = ", \n".join(map(str, rules))
-        self.assertTrue('murano:property+("c86104748a0c4907b4c5981e6d3bce9f", '
-                        '"tenant_id", "tenant1")' in rules_str)
+        self.assertTrue(
+            'murano:properties+("c86104748a0c4907b4c5981e6d3bce9f", '
+            '"tenant_id", "tenant1")' in rules_str)
 
     def test_wordpress(self):
         class_loader = MockClassLoader([
@@ -223,5 +224,5 @@ class TestCongressRules(unittest.TestCase):
         rules_str = self._create_rules_str('model.yaml')
 
         self.assertTrue(
-            'murano:state+("c86104748a0c4907b4c5981e6d3bce9f", "PENDING")'
+            'murano:states+("c86104748a0c4907b4c5981e6d3bce9f", "PENDING")'
             in rules_str)

@@ -31,11 +31,9 @@ class ValidationError(Exception):
 class ModelPolicyEnforcer(object):
     """Policy Enforcer Implementation using Congress client
 
-    Converts murano model to list of congress data rules:
-        murano:object+(env_id, obj_id, type_name)
-        murano:property+(obj_id, prop_name, prop_value)
+    Converts murano model to list of congress data rules.
 
-    Then we ask congress using simulation api of congress rest client
+    We ask congress using simulation api of congress rest client
     to resolve "murano_system:predeploy_error(env_id, obj_id, msg)"
     table along with congress data rules to return validation results.
     """

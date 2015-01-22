@@ -24,16 +24,16 @@ import muranoclient.common.exceptions as murano_exceptions
 
 CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
                   'predeploy_error(eid, obj_id, msg):-'
-                  'murano:object(obj_id, eid, type),'
-                  'murano:property(obj_id, "flavor", flavor_name),'
+                  'murano:objects(obj_id, eid, type),'
+                  'murano:properties(obj_id, "flavor", flavor_name),'
                   'invalid_flavor_name(flavor_name),'
-                  'murano:property(obj_id, "name", obj_name),'
+                  'murano:properties(obj_id, "name", obj_name),'
                   'concat(obj_name, ": bad flavor", msg)',
                   'predeploy_error(eid, obj_id, msg):-'
-                  'murano:object(obj_id, eid, type),'
-                  'murano:property(obj_id, "keyname", key_name),'
+                  'murano:objects(obj_id, eid, type),'
+                  'murano:properties(obj_id, "keyname", key_name),'
                   'missing_key(key_name),'
-                  'murano:property(obj_id, "name", obj_name),'
+                  'murano:properties(obj_id, "name", obj_name),'
                   'concat(obj_name, ": missing key", msg)',
                   'missing_key("")']
 

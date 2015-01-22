@@ -16,13 +16,13 @@ Models of Murano applications are transformed to set of rules that are processed
 
 There are several "tables" created in murano policy for different kind of rules:
 
-- ``murano:object(environment_id, object_id, type_name)``
-- ``murano:property(object_id, property_name, property_value)``
-- ``murano:relationship(source, target, name)``
-- ``murano:parent_type(object_id, parent_name)``
-- ``murano:state(environment_id, state)``
+- ``murano:objects(environment_id, object_id, type_name)``
+- ``murano:properties(object_id, property_name, property_value)``
+- ``murano:relationships(source, target, name)``
+- ``murano:parent_types(object_id, parent_name)``
+- ``murano:states(environment_id, state)``
 
-``murano:object(environment_id, object_id, type_name)``
+``murano:objects(environment_id, object_id, type_name)``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
 This rule is used for representation of all objects in murano model (environment, applications, instances, ...):
 
@@ -36,13 +36,13 @@ This rule is used for representation of all objects in murano model (environment
 
 Transformed to these rules:
 
-- ``murano:object+("83bff5ac", "83bff5ac", "io.murano.Environment")``
-- ``murano:object+("83bff5ac", "e7a13d3c", "io.murano.databases.MySql")``
+- ``murano:objects+("83bff5ac", "83bff5ac", "io.murano.Environment")``
+- ``murano:objects+("83bff5ac", "e7a13d3c", "io.murano.databases.MySql")``
 
 .. note:: In case of rule for environment ``environment_id``, ``object_id`` are the same.
 
 
-``murano:property(object_id, property_name, property_value)``
+``murano:properties(object_id, property_name, property_value)``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 Each object can have properties. In this example we have application with one property:
 
@@ -55,7 +55,7 @@ Each object can have properties. In this example we have application with one pr
 
 Transformed to these rules:
 
-- ``murano:property+("e7a13d3c", "database", "wordpress")``
+- ``murano:properties+("e7a13d3c", "database", "wordpress")``
 
 Inner properties are also supported using dot notation:
 
@@ -69,7 +69,7 @@ Inner properties are also supported using dot notation:
 
 Transformed to these rules:
 
-- ``murano:property+("825dc61d", "networks.useFlatNetwork", "False")``
+- ``murano:properties+("825dc61d", "networks.useFlatNetwork", "False")``
 
 If model contains list of values it is represented as set of multiple rules:
 
@@ -83,14 +83,14 @@ If model contains list of values it is represented as set of multiple rules:
 
 Transformed to these rules:
 
-- ``murano:property+("be3c5155", "networks.customNetworks", "10.0.1.0")``
-- ``murano:property+("be3c5155", "networks.customNetworks", "10.0.2.0")``
+- ``murano:properties+("be3c5155", "networks.customNetworks", "10.0.1.0")``
+- ``murano:properties+("be3c5155", "networks.customNetworks", "10.0.2.0")``
 
 There is one special property on environment for tenant_id:
 
-- ``murano:property+("...", "tenant_id", "123")``
+- ``murano:properties+("...", "tenant_id", "123")``
 
-``murano:relationship(source, target, name)``
+``murano:relationships(source, target, name)``
 """"""""""""""""""""""""""""""""""""""""""""""
 Murano app models can contain references to other applications. In this example WordPress application references MySQL in property "database":
 
@@ -108,9 +108,9 @@ Murano app models can contain references to other applications. In this example 
 
 Transformed to these rules:
 
-- ``murano:relationship+("50fa68ff", "0aafd67e", "database")``
+- ``murano:relationships+("50fa68ff", "0aafd67e", "database")``
 
-.. note:: For property "database" we do not create rule ``murano:property+``.
+.. note:: For property "database" we do not create rule ``murano:properties+``.
 
 Also if we define inner object inside other object, they will have relationship between them:
 
@@ -126,9 +126,9 @@ Also if we define inner object inside other object, they will have relationship 
 
 Transformed to these rules:
 
-- ``murano:relationship+("0aafd67e", "ed8df2b0", "instance")``
+- ``murano:relationships+("0aafd67e", "ed8df2b0", "instance")``
 
-murano:parent_type(object_id, parent_name)
+murano:parent_types(object_id, parent_name)
 """""""""""""""""""""""""""""""""""""""""""
 Each object in murano has class type and these classes can inherit from one or more parents:
 
@@ -144,17 +144,17 @@ So this model:
 
 Transformed to these rules:
 
-- ``murano:object+("...", "be3c5155", "LinuxMuranoInstance")``
-- ``murano:parent_type+("be3c5155", "LinuxMuranoInstance")``
-- ``murano:parent_type+("be3c5155", "LinuxInstance")``
-- ``murano:parent_type+("be3c5155", "Instance")``
+- ``murano:objects+("...", "be3c5155", "LinuxMuranoInstance")``
+- ``murano:parent_types+("be3c5155", "LinuxMuranoInstance")``
+- ``murano:parent_types+("be3c5155", "LinuxInstance")``
+- ``murano:parent_types+("be3c5155", "Instance")``
 
 .. note:: Type of object is also repeated among parent types (``LinuxMuranoInstance`` in example) for easier handling of user-created rules.
 
 .. note:: If type inherits from more than one parent and those parents inherit from one common type, ``parent_type`` rule is included only once for common type.
 
-murano:state(environment_id, state)
+murano:states(environment_id, state)
 """""""""""""""""""""""""""""""""""""""""""
 Currently only one record for environment is created:
 
-- ``murano:state+("uugi324", "PENDING")``
+- ``murano:states+("uugi324", "PENDING")``
