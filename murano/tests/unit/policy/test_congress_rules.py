@@ -59,7 +59,7 @@ class TestCongressRules(unittest.TestCase):
     def _create_rules_str(self, model_file, class_loader=None):
         model = self._load_file(model_file)
 
-        congress_rules = congress.CongressRules()
+        congress_rules = congress.CongressRulesManager()
         rules = congress_rules.convert(model, class_loader)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
@@ -67,7 +67,7 @@ class TestCongressRules(unittest.TestCase):
         return rules_str
 
     def test_empty_model(self):
-        congress_rules = congress.CongressRules()
+        congress_rules = congress.CongressRulesManager()
         rules = congress_rules.convert(None)
         self.assertTrue(len(rules) == 0)
 
@@ -158,7 +158,7 @@ class TestCongressRules(unittest.TestCase):
 
         model = Struct(d)
 
-        congress_rules = congress.CongressRules()
+        congress_rules = congress.CongressRulesManager()
         rules = congress_rules.convert(model)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
@@ -169,7 +169,7 @@ class TestCongressRules(unittest.TestCase):
 
     def test_tenant_id(self):
         model = self._load_file("model.yaml")
-        congress_rules = congress.CongressRules()
+        congress_rules = congress.CongressRulesManager()
         rules = congress_rules.convert(model, tenant_id='tenant1')
         rules_str = ", \n".join(map(str, rules))
         self.assertTrue(

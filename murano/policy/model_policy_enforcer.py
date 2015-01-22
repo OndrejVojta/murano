@@ -42,25 +42,18 @@ class ModelPolicyEnforcer(object):
         self._environment = environment
         self._client_manager = environment.clients
 
-    def validate(self, model, action_name, class_loader=None):
+    def validate(self, model, class_loader=None):
         """Validate model using Congress rule engine.
 
         @type model: dict
         @param model: Dictionary representation of model starting on
                       environment level (['Objects'])
-        @type action_name: string
-        @param action_name: name of the action for which validation is called
         @type class_loader: murano.dsl.class_loader.MuranoClassLoader
         @param class_loader: Optional. Used for evaluating parent class types
         @raises ValidationError in case validation was not successful
         """
 
         if model is None:
-            return
-
-        if action_name != 'deploy':
-            LOG.debug(_("Skipping validation for action '{0}'")
-                      .format(action_name))
             return
 
         client = self._client_manager.get_congress_client(self._environment)
@@ -70,13 +63,13 @@ class ModelPolicyEnforcer(object):
         LOG.info(_('Validating model'))
         LOG.debug(model)
 
-        rules = congress_rules.CongressRules() \
+        rules = congress_rules.CongressRulesManager() \
             .convert(model, class_loader,
                      self._environment.tenant_id)
 
         rules_str = " ".join(map(str, rules))
-        LOG.debug(_('Congress rules:') +
-                  ' \n  ' + '\n  '.join(map(str, rules)) + '\n')
+        LOG.debug(_('Congress rules: \n  ') +
+                  '\n  '.join(map(str, rules)))
 
         validation_result = client.execute_policy_action(
             "murano_system",

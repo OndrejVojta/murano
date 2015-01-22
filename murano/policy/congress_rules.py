@@ -14,7 +14,7 @@
 #    under the License.
 
 
-class CongressRules(object):
+class CongressRulesManager(object):
     """Converts murano model to list of congress rules:
         - murano:objects+(env_id, obj_id, type_name)
         - murano:properties+(obj_id, prop_name, prop_value)
@@ -38,10 +38,10 @@ class CongressRules(object):
 
         # Arbitrary property for tenant_id.
         if tenant_id is not None:
-            r = MuranoProperty(self._env_id, 'tenant_id', tenant_id)
+            r = PropertyRule(self._env_id, 'tenant_id', tenant_id)
             self._rules.append(r)
 
-        state_rule = MuranoState(self._env_id, 'PENDING')
+        state_rule = StateRule(self._env_id, 'PENDING')
         self._rules.append(state_rule)
 
         self._walk(model, self._process_item)
@@ -49,7 +49,7 @@ class CongressRules(object):
         # Convert MuranoProperty containing reference to another object
         # to MuranoRelationship.
         object_ids = [rule.obj_id for rule in self._rules
-                      if isinstance(rule, MuranoObject)]
+                      if isinstance(rule, ObjectRule)]
 
         self._rules = [self._create_relationship(rule, object_ids)
                        for rule in self._rules]
@@ -91,15 +91,15 @@ class CongressRules(object):
 
     @staticmethod
     def _create_object_rule(app, env_id):
-        return MuranoObject(app['?']['id'], env_id, app['?']['type'])
+        return ObjectRule(app['?']['id'], env_id, app['?']['type'])
 
     def _create_propety_rules(self, obj_id, obj, prefix=""):
         rules = []
 
         # Skip when inside properties of other object.
         if '?' in obj and prefix != "":
-            rules.append(MuranoRelationship(obj_id, obj['?']['id'],
-                                            prefix.split('.')[0]))
+            rules.append(RelationshipRule(obj_id, obj['?']['id'],
+                                          prefix.split('.')[0]))
             return rules
 
         for key, value in obj.iteritems():
@@ -117,25 +117,25 @@ class CongressRules(object):
                 for v in value:
                     v = self._to_dict(v)
                     if not isinstance(v, dict):
-                        rule = MuranoProperty(obj_id, prefix + key, v)
+                        rule = PropertyRule(obj_id, prefix + key, v)
                         rules.append(rule)
             else:
-                rule = MuranoProperty(obj_id, prefix + key, value)
+                rule = PropertyRule(obj_id, prefix + key, value)
                 rules.append(rule)
 
         return rules
 
     @staticmethod
     def _is_relationship(rule, app_ids):
-        if not isinstance(rule, MuranoProperty):
+        if not isinstance(rule, PropertyRule):
             return False
 
         return rule.prop_value in app_ids
 
     def _create_relationship(self, rule, app_ids):
         if self._is_relationship(rule, app_ids):
-            return MuranoRelationship(rule.obj_id, rule.prop_value,
-                                      rule.prop_name)
+            return RelationshipRule(rule.obj_id, rule.prop_value,
+                                    rule.prop_name)
         else:
             return rule
 
@@ -155,11 +155,11 @@ class CongressRules(object):
     def _create_parent_type_rules(app_id, types):
         rules = []
         for type_name in types:
-            rules.append(MuranoParentType(app_id, type_name))
+            rules.append(ParentTypeRule(app_id, type_name))
         return rules
 
 
-class MuranoObject(object):
+class ObjectRule(object):
     def __init__(self, obj_id, env_id, type_name):
         self.obj_id = obj_id
         self.env_id = env_id
@@ -170,7 +170,7 @@ class MuranoObject(object):
             .format(self.obj_id, self.env_id, self.type_name)
 
 
-class MuranoProperty(object):
+class PropertyRule(object):
     def __init__(self, obj_id, prop_name, prop_value):
         self.obj_id = obj_id
         self.prop_name = prop_name
@@ -181,7 +181,7 @@ class MuranoProperty(object):
             .format(self.obj_id, self.prop_name, self.prop_value)
 
 
-class MuranoRelationship(object):
+class RelationshipRule(object):
     def __init__(self, source_id, target_id, rel_name):
         self.source_id = source_id
         self.target_id = target_id
@@ -192,7 +192,7 @@ class MuranoRelationship(object):
             .format(self.source_id, self.target_id, self.rel_name)
 
 
-class MuranoParentType(object):
+class ParentTypeRule(object):
     def __init__(self, obj_id, type_name):
         self.obj_id = obj_id
         self.type_name = type_name
@@ -202,11 +202,10 @@ class MuranoParentType(object):
             .format(self.obj_id, self.type_name)
 
 
-class MuranoState(object):
+class StateRule(object):
     def __init__(self, obj_id, state):
         self.obj_id = obj_id
         self.state = state
 
     def __str__(self):
-        return 'murano:states+("{0}", "{1}")' \
-            .format(self.obj_id, self.state)
+        return 'murano:states+("{0}", "{1}")'.format(self.obj_id, self.state)
