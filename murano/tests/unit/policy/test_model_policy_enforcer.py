@@ -81,7 +81,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
     def test_validation_failure(self):
         self.congress_client_mock.execute_policy_action.return_value = \
-            {"result": ['predeploy_error("123","instance1","failure")']}
+            {"result": ['predeploy_errors("123","instance1","failure")']}
 
         model = {'?': {'id': '123', 'type': 'class'}}
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
@@ -91,9 +91,9 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
     def test_parse_result(self):
         congress_response = [
             'unexpected response',
-            'predeploy_error("env1","instance1","Instance 1 has problem")',
-            'predeploy_error("env1","instance1","Instance 2 has problem")',
-            'predeploy_error("env2","instance1","Instance 3 has problem")'
+            'predeploy_errors("env1","instance1","Instance 1 has problem")',
+            'predeploy_errors("env1","instance1","Instance 2 has problem")',
+            'predeploy_errors("env2","instance1","Instance 3 has problem")'
         ]
 
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)

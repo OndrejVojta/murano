@@ -34,7 +34,7 @@ class ModelPolicyEnforcer(object):
     Converts murano model to list of congress data rules.
 
     We ask congress using simulation api of congress rest client
-    to resolve "murano_system:predeploy_error(env_id, obj_id, msg)"
+    to resolve "murano_system:predeploy_errors(env_id, obj_id, msg)"
     table along with congress data rules to return validation results.
     """
 
@@ -76,7 +76,7 @@ class ModelPolicyEnforcer(object):
             "simulate",
             False,
             False,
-            {'query': 'predeploy_error(eid, oid, msg)',
+            {'query': 'predeploy_errors(eid, oid, msg)',
              'action_policy': 'action',
             'sequence': rules_str})
 
@@ -95,15 +95,15 @@ class ModelPolicyEnforcer(object):
 
     def _parse_messages(self, env_id, results):
         """Transforms list of strings in format
-            ['predeploy_error("env_id_1", "obj_id_1", "message1")',
-            'predeploy_error("env_id_2", "obj_id_2", "message2")']
+            ['predeploy_errors("env_id_1", "obj_id_1", "message1")',
+            'predeploy_errors("env_id_2", "obj_id_2", "message2")']
         to list of strings with message only filtered to provided
         env_id (e.g. 'env_id_1'):
             ['message2']
         """
 
         messages = []
-        regexp = 'predeploy_error\("([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\)'
+        regexp = 'predeploy_errors\("([^"]*)",\s*"([^"]*)",\s*"([^"]*)"\)'
         for result in results:
             match = re.search(regexp, result)
             if match:
