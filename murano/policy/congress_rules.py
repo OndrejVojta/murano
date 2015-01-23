@@ -166,8 +166,9 @@ class ObjectRule(object):
         self.type_name = type_name
 
     def __str__(self):
-        return 'murano:objects+("{0}", "{1}", "{2}")'\
-            .format(self.obj_id, self.env_id, self.type_name)
+        return 'murano:objects+("{0}", "{1}", "{2}")'.format(self.obj_id,
+                                                             self.env_id,
+                                                             self.type_name)
 
 
 class PropertyRule(object):
@@ -177,8 +178,8 @@ class PropertyRule(object):
         self.prop_value = prop_value
 
     def __str__(self):
-        return 'murano:properties+("{0}", "{1}", "{2}")' \
-            .format(self.obj_id, self.prop_name, self.prop_value)
+        return 'murano:properties+("{0}", "{1}", "{2}")'.format(
+            self.obj_id, self.prop_name, self.prop_value)
 
 
 class RelationshipRule(object):
@@ -188,8 +189,8 @@ class RelationshipRule(object):
         self.rel_name = rel_name
 
     def __str__(self):
-        return 'murano:relationships+("{0}", "{1}", "{2}")' \
-            .format(self.source_id, self.target_id, self.rel_name)
+        return 'murano:relationships+("{0}", "{1}", "{2}")'.format(
+            self.source_id, self.target_id, self.rel_name)
 
 
 class ParentTypeRule(object):
@@ -198,8 +199,8 @@ class ParentTypeRule(object):
         self.type_name = type_name
 
     def __str__(self):
-        return 'murano:parent_types+("{0}", "{1}")' \
-            .format(self.obj_id, self.type_name)
+        return 'murano:parent_types+("{0}", "{1}")'.format(self.obj_id,
+                                                           self.type_name)
 
 
 class StateRule(object):
