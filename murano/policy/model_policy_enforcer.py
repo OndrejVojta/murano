@@ -63,9 +63,8 @@ class ModelPolicyEnforcer(object):
         LOG.info(_('Validating model'))
         LOG.debug(model)
 
-        rules = congress_rules.CongressRulesManager() \
-            .convert(model, class_loader,
-                     self._environment.tenant_id)
+        rules = congress_rules.CongressRulesManager().convert(
+            model, class_loader, self._environment.tenant_id)
 
         rules_str = " ".join(map(str, rules))
         LOG.debug(_('Congress rules: \n  ') +
