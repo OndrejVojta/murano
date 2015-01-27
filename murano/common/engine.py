@@ -109,16 +109,13 @@ class TaskExecutor(object):
         self._environment.system_attributes = self._model.get('SystemData', {})
         self._environment.clients = client_manager.ClientManager()
 
-        self._model_policy_enforcer = \
-            enforcer.ModelPolicyEnforcer(self._environment)
+        self._model_policy_enforcer = enforcer.ModelPolicyEnforcer(
+            self._environment)
 
     def execute(self):
         self._create_trust()
 
         try:
-            # pkg_loader = package_loader.DirectoryPackageLoader('./meta')
-            # return self._execute(pkg_loader)
-
             murano_client_factory = lambda: \
                 self._environment.clients.get_murano_client(self._environment)
             with package_loader.ApiPackageLoader(

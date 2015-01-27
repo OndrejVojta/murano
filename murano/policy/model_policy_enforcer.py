@@ -60,14 +60,14 @@ class ModelPolicyEnforcer(object):
         if not client:
             raise ValueError(_('Congress client is not configured!'))
 
-        LOG.info(_('Validating model'))
+        LOG.info('Validating model')
         LOG.debug(model)
 
         rules = congress_rules.CongressRulesManager().convert(
             model, class_loader, self._environment.tenant_id)
 
         rules_str = " ".join(map(str, rules))
-        LOG.debug(_('Congress rules: \n  ') +
+        LOG.debug('Congress rules: \n  ' +
                   '\n  '.join(map(str, rules)))
 
         validation_result = client.execute_policy_action(
@@ -87,10 +87,11 @@ class ModelPolicyEnforcer(object):
 
             if messages:
                 result_str = "\n  ".join(map(str, messages))
-                raise ValidationError(_("Model validation failed:") +
-                                      "\n  " + result_str)
+                raise ValidationError(
+                    _("Murano object model validation failed:") +
+                    "\n  " + result_str)
         else:
-            LOG.info(_('Model valid'))
+            LOG.info('Model valid')
 
     def _parse_messages(self, env_id, results):
         """Transforms list of strings in format
